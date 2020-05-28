@@ -1,0 +1,8 @@
+{
+  "name": "Arma 3 Radio",
+  "prefix": "a3r",
+  "author": "SynixeBrett",
+  "files": [
+    "mod.cpp"
+  ]
+}
