@@ -6,8 +6,16 @@ class CfgPatches {
     units[] = {};
     weapons[] = {};
     requiredVersion = REQUIRED_VERSION;
-    requiredAddons[] = {"cba_settings"};
+    requiredAddons[] = {"radio_main"};
     author = "SynixeBrett";
     VERSION_CONFIG;
   };
+};
+
+#include "CfgEventHandlers.hpp"
+#include "CfgRadioStations.hpp"
+#include "RscAttributes.hpp"
+
+class CfgVehicles {
+  #include "ACEInteractions.hpp"
 };

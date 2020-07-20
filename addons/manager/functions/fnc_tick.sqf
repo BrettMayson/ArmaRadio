@@ -1,7 +1,9 @@
 #include "script_component.hpp"
 
-private _d = vectorDir player;
-private _u = vectorUp player;
+
+
+private _d = eyeDirection ACE_player;
+private _u = vectorUp ACE_player;
 EXT callExtension ["orientation", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
 
 {
@@ -17,8 +19,6 @@ EXT callExtension ["orientation", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
 		];
 		EXT callExtension ["pos", _data];
 	} else {
-		EXT callExtension ["destroy", [_x]];
-		GVAR(active) setVariable [_x, nil];
-		systemChat format ["%1 destroy %2", EXT, [_x]];
+		[QGVAR(stop), [_x]] call CBA_fnc_localEvent;
 	};
 } forEach allVariables GVAR(active);

@@ -38,7 +38,11 @@ impl SoundSource {
             })
             .unwrap();
             let stream = Arc::new(Mutex::new(crate::CONTEXT.new_streaming_source().unwrap()));
-            stream.lock().unwrap().set_soft_spatialization(alto::SoftSourceSpatialization::Enabled);
+            stream
+                .lock()
+                .unwrap()
+                .set_soft_spatialization(alto::SoftSourceSpatialization::Enabled);
+            // stream.lock().unwrap().set_rolloff_factor(1.0);
             stream.lock().unwrap().play();
             let (txi, rxi): (Sender<()>, Receiver<()>) = mpsc::channel();
             let inner_stream = stream.clone();
@@ -55,11 +59,7 @@ impl SoundSource {
                             .unwrap()
                             .set_velocity([message[3], message[4], message[5]])
                             .unwrap();
-                        inner_stream
-                            .lock()
-                            .unwrap()
-                            .set_gain(message[6])
-                            .unwrap();
+                        inner_stream.lock().unwrap().set_gain(message[6]).unwrap();
                     }
                     Err(TryRecvError::Empty) => {}
                     Err(TryRecvError::Disconnected) => {
