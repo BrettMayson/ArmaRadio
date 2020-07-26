@@ -3,7 +3,7 @@ prefix = "radio"
 author = "Brett"
 mainprefix = "dynulo"
 include = ["./include"]
-files = ["mod.cpp", "dynulo_radio_x64.dll"]
+files = ["mod.cpp", "dynulo_radio.dll", "dynulo_radio_x64.dll"]
 
 postbuild = ["!extension"]
 releasebuild = ["@zip {{modname}}", "@zip {{key_name}}"]
@@ -13,7 +13,8 @@ show_output = true
 steps_windows = [
     "rustup target add i686-pc-windows-msvc",
     "cd extension && cargo build --release && cargo build --release --target=i686-pc-windows-msvc",
-    "copy extension\\target\\release\\dynulo_radio.dll dynulo_radio_x64.dll"
+    "copy extension\\target\\release\\dynulo_radio.dll dynulo_radio_x64.dll",
+    "copy extension\\target\\i686-pc-windows-msvc\\release\\dynulo_radio.dll dynulo_radio.dll",
 ]
 steps_linux = [
     "echo \"Unable to build extension on Linux\""

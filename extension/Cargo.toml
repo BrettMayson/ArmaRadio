@@ -1,18 +1,18 @@
 [package]
-name = "extension"
+name = "dynulo_radio"
 version = "0.1.0"
 authors = ["Dynulo"]
 edition = "2018"
 
 [lib]
-name = "dynulo_radio"
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 alto = "3.0"
-arma-rs = { git = "https://github.com/synixebrett/arma-rs", branch = "master" }
+# arma-rs = { git = "https://github.com/synixebrett/arma-rs", branch = "master" }
+arma-rs = { path = "../../arma-rs/core" }
 lazy_static = "1.4"
 log = "0.4"
 rand = "0.7"

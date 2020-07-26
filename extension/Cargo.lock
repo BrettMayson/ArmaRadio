@@ -31,16 +31,14 @@ dependencies = [
 [[package]]
 name = "arma-rs"
 version = "0.2.0"
-source = "git+https://github.com/synixebrett/arma-rs#e6db7c18f6976d31cb017582ca05693958b7fe97"
 dependencies = [
- "arma-rs-codegen 0.2.0 (git+https://github.com/synixebrett/arma-rs)",
+ "arma-rs-codegen 0.2.0",
  "libc 0.2.73 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "arma-rs-codegen"
 version = "0.2.0"
-source = "git+https://github.com/synixebrett/arma-rs#e6db7c18f6976d31cb017582ca05693958b7fe97"
 dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -112,25 +110,25 @@ version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "encoding_rs"
-version = "0.8.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "extension"
+name = "dynulo_radio"
 version = "0.1.0"
 dependencies = [
  "alto 3.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "arma-rs 0.2.0 (git+https://github.com/synixebrett/arma-rs)",
+ "arma-rs 0.2.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.10.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-embed 5.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "simplemad 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "encoding_rs"
+version = "0.8.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1241,8 +1239,6 @@ dependencies = [
 "checksum aho-corasick 0.7.13 (registry+https://github.com/rust-lang/crates.io-index)" = "043164d8ba5c4c3035fec9bbee8647c0261d788f3474306f93bb65901cae0e86"
 "checksum al-sys 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ff8d9b0f4d10264c060ee5614dedb6b7695f366e93be6549c48f58981da39023"
 "checksum alto 3.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "d75be812fc4f27ac66752f30715a2357c9f3ad619229fc21cf431b32606dfae5"
-"checksum arma-rs 0.2.0 (git+https://github.com/synixebrett/arma-rs)" = "<none>"
-"checksum arma-rs-codegen 0.2.0 (git+https://github.com/synixebrett/arma-rs)" = "<none>"
 "checksum autocfg 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 "checksum base64 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)" = "3441f0f7b02788e948e47f457ca01f1d7e6d92c693bc132c22b087d3141c03ff"
 "checksum bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"

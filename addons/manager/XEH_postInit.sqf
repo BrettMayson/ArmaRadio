@@ -9,7 +9,6 @@
 
 [QGVAR(stop), {
 	params ["_id"];
-	systemChat "stopping";
 	EXT callExtension ["destroy", [_id]];
 	GVAR(active) setVariable [_id, nil];
 	GVAR(jips) = GVAR(jips) - [_id];

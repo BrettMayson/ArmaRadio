@@ -20,6 +20,8 @@ EXT callExtension ["orientation", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
 		};
 		EXT callExtension ["pos", _data];
 	} else {
-		[QGVAR(stop), [_x]] call CBA_fnc_localEvent;
+		if !(_souce isEqualTo objNull) then {
+			[QGVAR(stop), [_x]] call CBA_fnc_localEvent;
+		};
 	};
 } forEach allVariables GVAR(active);
