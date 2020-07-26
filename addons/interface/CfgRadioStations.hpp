@@ -3,14 +3,6 @@ class CfgRadioStations {
 		name = "BBC Radio 1";
 		url = "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_p"
 	};
-	class currenthits {
-		name = "Current Hits FM";
-		url = "http://us3.internet-radio.com:8317/live";
-	};
-	class truckers {
-		name = "Truckers FM";
-		url = "http://radio.truckers.fm";
-	};
 	class classic_rock_109 {
 		name = "Classic Rock 109";
 		url = "http://listen.classicrock109.com:10042";

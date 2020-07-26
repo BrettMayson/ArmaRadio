@@ -3,8 +3,8 @@ use std::sync::Mutex;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
-use alto::{Alto, DeviceObject};
-use arma_rs::{rv, rv_handler};
+use alto::Alto;
+use arma_rs::{rv, rv_callback, rv_handler};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use rust_embed::RustEmbed;
@@ -14,6 +14,8 @@ use crate::source::SoundSource;
 
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate log;
 
 lazy_static! {
     static ref AL: Alto = {
@@ -24,15 +26,25 @@ lazy_static! {
             // let mut out = std::fs::File::create(&openal).expect("failed to create file");
             // std::io::copy(&mut resp, &mut out).expect("failed to copy content");
             let dll = Assets::get("OpenAL32.dll").unwrap();
-            let mut out = std::fs::File::create(&openal).expect("failed to create file");
-            std::io::copy(&mut std::io::Cursor::new(dll), &mut out).expect("failed to copy content");
+            info!("Creating OpenAL.dll");
+            let mut out = std::fs::File::create(&openal).expect({
+                println!("Failed to create OpenAL32.dll");
+                error!("Failed to create OpenAL32.dll");
+                "Failed to create OpenAL32.dll"
+            });
+            std::io::copy(&mut std::io::Cursor::new(dll), &mut out).expect({
+                println!("Failed to write to OpenAL32.dll");
+                error!("Failed to write to OpenAL32.dll");
+                "Failed to write to OpenAL32.dll"
+            });
         }
         Alto::load_default().unwrap()
     };
     static ref SOURCES: Mutex<HashMap<String, SoundSource>> = Mutex::new(HashMap::new());
     static ref CONTEXT: alto::Context = {
         let device = AL.open(None).unwrap();
-        println!("{:?}", device.specifier());
+        use alto::DeviceObject;
+        debug!("{:?}", device.specifier());
         device.new_context(None).unwrap()
     };
 }
@@ -79,17 +91,23 @@ fn id() -> String {
 }
 
 #[rv]
-fn create(source: String, sid: String) -> String {
+fn create(source: String, sid: String, gain: f32) -> String {
     SOURCES
         .lock()
         .unwrap()
-        .insert(sid.clone(), SoundSource::new(source));
+        .insert(sid.clone(), SoundSource::new(source, gain));
     sid
 }
 
 #[rv]
 fn destroy(sid: String) -> bool {
-    SOURCES.lock().unwrap().remove(&sid).is_some()
+    info!("`{}` has been told to die", sid);
+    if let Some(source) = SOURCES.lock().unwrap().remove(&sid) {
+        info!("`{}` was playing `{}`", sid, source.station);
+        true
+    } else {
+        false
+    }
 }
 
 #[rv]
@@ -124,14 +142,35 @@ fn list() -> String {
     format!("[{}]", sources.join(","))
 }
 
+use log::{Record, Level, LevelFilter, Metadata};
+struct ArmaLogger;
+
+impl log::Log for ArmaLogger {
+    fn enabled(&self, metadata: &Metadata) -> bool {
+        metadata.level() <= Level::Info
+    }
+
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            rv_callback!("arma_radio_log", format!("{}", record.level()).to_lowercase(), record.args());
+        }
+    }
+
+    fn flush(&self) {}
+}
+static LOGGER: ArmaLogger = ArmaLogger;
+
 #[rv_handler]
 fn init() {
+    log::set_logger(&LOGGER)
+        .map(|()| log::set_max_level(LevelFilter::Info));
+
     CONTEXT.set_position([0.0, 0.0, 0.0]).unwrap();
     CONTEXT.set_velocity([0.0, 0.0, 0.0]).unwrap();
     CONTEXT
         .set_orientation(([0.0, 0.0, 1.0], [0.0, 1.0, 0.0]))
         .unwrap();
     CONTEXT.set_meters_per_unit(1.0).unwrap();
-    CONTEXT.set_distance_model(alto::DistanceModel::Inverse);
+    CONTEXT.set_distance_model(alto::DistanceModel::Exponent);
     CONTEXT.set_doppler_factor(0.2);
 }

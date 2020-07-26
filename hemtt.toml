@@ -11,7 +11,8 @@ releasebuild = ["@zip {{modname}}", "@zip {{key_name}}"]
 [scripts.extension]
 show_output = true
 steps_windows = [
-    "cd extension && cargo build --release",
+    "rustup target add i686-pc-windows-msvc",
+    "cd extension && cargo build --release && cargo build --release --target=i686-pc-windows-msvc",
     "copy extension\\target\\release\\dynulo_radio.dll dynulo_radio_x64.dll"
 ]
 steps_linux = [

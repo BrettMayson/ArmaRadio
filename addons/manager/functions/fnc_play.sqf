@@ -1,6 +1,6 @@
 #include "script_component.hpp"
 
-params ["_url", "_source"];
+params ["_source", "_url"];
 
 private _ret = "";
 

@@ -25,13 +25,15 @@ pub struct SoundSource {
     gain: f32,
     time: SystemTime,
     channel: Sender<[f32; 7]>,
+    pub station: String,
 }
 impl SoundSource {
-    pub fn new(station: String) -> SoundSource {
+    pub fn new(station: String, gain: f32) -> SoundSource {
         let (tx, rx): (Sender<[f32; 7]>, Receiver<[f32; 7]>) = mpsc::channel();
+        let s = station.clone();
         std::thread::spawn(move || {
             let client = Client::new();
-            println!("Station: {}", station);
+            info!("Starting Radio. URL: {}", station);
             let request = client.get(&station);
             let decoder = Decoder::decode(OnlineRadio {
                 request: request.send().unwrap(),
@@ -42,6 +44,14 @@ impl SoundSource {
                 .lock()
                 .unwrap()
                 .set_soft_spatialization(alto::SoftSourceSpatialization::Enabled);
+            stream
+                .lock()
+                .unwrap()
+                .set_max_gain(2f32);
+            stream
+                .lock()
+                .unwrap()
+                .set_gain(gain);
             // stream.lock().unwrap().set_rolloff_factor(1.0);
             stream.lock().unwrap().play();
             let (txi, rxi): (Sender<()>, Receiver<()>) = mpsc::channel();
@@ -63,7 +73,6 @@ impl SoundSource {
                     }
                     Err(TryRecvError::Empty) => {}
                     Err(TryRecvError::Disconnected) => {
-                        println!("Inner Terminating");
                         txi.send(());
                         break;
                     }
@@ -71,11 +80,11 @@ impl SoundSource {
             });
             for decoding_result in decoder {
                 if let Err(TryRecvError::Disconnected) = rxi.try_recv() {
-                    println!("Terminating");
+                    info!("Dying");
                     break;
                 }
                 match decoding_result {
-                    Err(e) => println!("Error: {:?}", e),
+                    Err(_) => {},// error!("Error: {:?}", e),
                     Ok(frame) => {
                         let samples: Vec<alto::Mono<i16>> = frame.samples[0]
                             .iter()
@@ -96,9 +105,10 @@ impl SoundSource {
         SoundSource {
             position: Vector3::new(0.0, 0.0, 0.0),
             velocity: Vector3::new(0.0, 0.0, 0.0),
-            gain: 1.0f32,
+            gain: gain,
             time: SystemTime::now(),
             channel: tx,
+            station: s,
         }
     }
 
