@@ -152,7 +152,7 @@ impl log::Log for ArmaLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            rv_callback!("arma_radio_log", format!("{}", record.level()).to_lowercase(), record.args());
+            rv_callback!("arma_radio_log", format!("{}", record.level()).to_lowercase(), format!("{}", record.args()));
         }
     }
 

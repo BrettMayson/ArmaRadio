@@ -14,7 +14,7 @@
 
 params ["_display"];
 
-_display displayAddEventHandler ["onUnload", {
+_display displayAddEventHandler ["Unload", {
     params ["_display"];
     private _slider = _display displayCtrl 13589;
     _control ctrlRemoveAllEventHandlers "SliderPosChanged"; 
@@ -30,7 +30,7 @@ _slider sliderSetPosition (GVAR(target) getVariable [QEGVAR(manager,volume), 1])
 _slider ctrlAddEventHandler ["SliderPosChanged", {
     params ["_control", "_value"];
     GVAR(target) setVariable [QEGVAR(manager,volume), _value];
-    [GVAR(target), _value] call EFUNC(manager,volume);
+    [QEGVAR(manager,volume), [GVAR(target), _value]] call CBA_fnc_globalEvent;
 }];
 
 private _listbox = _display displayCtrl 16189;

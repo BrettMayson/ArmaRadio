@@ -15,7 +15,7 @@ if !(_existing isEqualTo []) then {
 
 if !(_ret isEqualTo "") exitWith {};
 if (_url isEqualTo "") exitWith {
-	_source setVariable [QGVAR(active), nil];
+	_source setVariable [QGVAR(active), nil, true];
 };
 
 private _id = EXT callExtension "id";
@@ -23,7 +23,7 @@ private _id = EXT callExtension "id";
 GVAR(jips) pushBack _id;
 publicVariable QGVAR(jips);
 
-_source setVariable [QGVAR(active), [_id, _url]];
+_source setVariable [QGVAR(active), [_id, _url], true];
 
 [QGVAR(start), [_url, _id, _source], _id] call CBA_fnc_globalEventJIP;
 

@@ -4,6 +4,7 @@ author = "Brett"
 mainprefix = "dynulo"
 include = ["./include"]
 files = ["mod.cpp", "dynulo_radio.dll", "dynulo_radio_x64.dll"]
+template = "cba"
 
 postbuild = ["!extension"]
 releasebuild = ["@zip {{modname}}", "@zip {{key_name}}"]
