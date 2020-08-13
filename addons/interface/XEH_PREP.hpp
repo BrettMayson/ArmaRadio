@@ -1,2 +1,12 @@
-PREP(ui_stations);
-PREP(openInterface);
+PREP(handleListSelect);
+PREP(handlePower);
+PREP(handleSearchButton);
+PREP(handleSearchClick);
+PREP(handleSearchKeyUp);
+PREP(handleVolume);
+PREP(handleVolumeButtonDown);
+PREP(handleVolumeButtonUp);
+PREP(handleVolumeMouse);
+PREP(open);
+PREP(updateInfo);
+PREP(updateList);

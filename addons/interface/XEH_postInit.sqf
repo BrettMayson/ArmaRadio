@@ -1,6 +1,6 @@
 #include "script_component.hpp"
 
-if !(isClass(configFile >> "CfgPatches" >> "ace_interaction")) then {
+if (!isClass (configFile >> "CfgPatches" >> "ace_interaction")) then {
 	[[
 		"FM Radio",
 		{

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="Radio">
+    <Package name="Interface">
+        <Key ID="STR_Radio_Interface_DisplayName">
+            <English>FM Radio</English>
+        </Key>
+        <Key ID="STR_Radio_Interface_On">
+            <English>On</English>
+        </Key>
+        <Key ID="STR_Radio_Interface_Off">
+            <English>Off</English>
+        </Key>
+    </Package>
+</Project>
