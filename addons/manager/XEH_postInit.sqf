@@ -1,6 +1,6 @@
 #include "script_component.hpp"
 
-if (isServer) then {
+if !(isServer) then {
 	[QGVAR(start), {
 		params ["_url", "_id", "_source"];
 		if !(_id in GVAR(jips)) exitWith {};
