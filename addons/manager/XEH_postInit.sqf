@@ -16,8 +16,8 @@ if (isServer) then {
 	}] call CBA_fnc_addEventHandler;
 
 	[QGVAR(volume), {
-		params ["_id", "_gain"];
-		[GVAR(target), _value] call FUNC(volume);
+		params ["_target", "_gain"];
+		[_target, _value] call FUNC(volume);
 	}] call CBA_fnc_addEventHandler;
 
 	[FUNC(tick)] call CBA_fnc_addPerFrameHandler;

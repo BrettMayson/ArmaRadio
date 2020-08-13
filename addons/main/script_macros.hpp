@@ -19,5 +19,5 @@
 
 // remoteExec
 #define REMOTE_GLOBAL   0
-#define REMOTE_SERVER   ([2,([ACE_player,2] select isDedicated)] select isServer)
+#define REMOTE_SERVER   ([2,([{call CBA_fnc_currentUnit},2] select isDedicated)] select isServer)
 #define REMOTE_CLIENTS  ([0,-2] select isDedicated)
