@@ -15,7 +15,7 @@ struct OnlineRadio<R> {
 }
 impl<R: Read> Read for OnlineRadio<R> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.request.read(buf).map(|n| n)
+        self.request.read(buf)
     }
 }
 
@@ -105,7 +105,7 @@ impl SoundSource {
         SoundSource {
             position: Vector3::new(0.0, 0.0, 0.0),
             velocity: Vector3::new(0.0, 0.0, 0.0),
-            gain: gain,
+            gain,
             time: SystemTime::now(),
             channel: tx,
             station: s,

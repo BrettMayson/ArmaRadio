@@ -162,8 +162,7 @@ static LOGGER: ArmaLogger = ArmaLogger;
 
 #[rv_handler]
 fn init() {
-    log::set_logger(&LOGGER)
-        .map(|()| log::set_max_level(LevelFilter::Info));
+    if let Ok(()) = log::set_logger(&LOGGER) { log::set_max_level(LevelFilter::Info) }
 
     CONTEXT.set_position([0.0, 0.0, 0.0]).unwrap();
     CONTEXT.set_velocity([0.0, 0.0, 0.0]).unwrap();
