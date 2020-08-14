@@ -1,6 +1,6 @@
 #include "script_component.hpp"
 
-if !(isServer) then {
+if (hasInterface) then {
 	[QGVAR(start), {
 		params ["_url", "_id", "_source"];
 		if !(_id in GVAR(jips)) exitWith {};
@@ -27,6 +27,9 @@ if !(isServer) then {
 addMissionEventHandler ["ExtensionCallback", {
     params ["_name", "_function", "_data"];
 
-    if !((tolower _name) isEqualTo "arma_radio_log") exitWith {};
-	LOG_SYS(_function,_data);
+    if ((tolower _name) isEqualTo "arma_radio_log") exitWith {
+		LOG_SYS(_function,_data);
+	};
+	if !((tolower _name) isEqualTo "arma_radio") exitWith {};
+	systemChat format ["%1: %2", _function, _data];
 }];

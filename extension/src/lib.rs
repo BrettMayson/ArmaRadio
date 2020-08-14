@@ -10,7 +10,10 @@ use rand::{thread_rng, Rng};
 use rust_embed::RustEmbed;
 
 mod source;
-use crate::source::SoundSource;
+use source::SoundSource;
+
+mod vector3;
+use vector3::Vector3;
 
 #[macro_use]
 extern crate lazy_static;
@@ -95,7 +98,7 @@ fn create(source: String, sid: String, gain: f32) -> String {
     SOURCES
         .lock()
         .unwrap()
-        .insert(sid.clone(), SoundSource::new(source, gain));
+        .insert(sid.clone(), SoundSource::new(sid.clone(), source, gain));
     sid
 }
 
@@ -142,7 +145,7 @@ fn list() -> String {
     format!("[{}]", sources.join(","))
 }
 
-use log::{Record, Level, LevelFilter, Metadata};
+use log::{Level, LevelFilter, Metadata, Record};
 struct ArmaLogger;
 
 impl log::Log for ArmaLogger {
@@ -152,7 +155,11 @@ impl log::Log for ArmaLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            rv_callback!("arma_radio_log", format!("{}", record.level()).to_lowercase(), format!("{}", record.args()));
+            rv_callback!(
+                "arma_radio_log",
+                format!("{}", record.level()).to_lowercase(),
+                format!("{}", record.args())
+            );
         }
     }
 
@@ -162,7 +169,9 @@ static LOGGER: ArmaLogger = ArmaLogger;
 
 #[rv_handler]
 fn init() {
-    if let Ok(()) = log::set_logger(&LOGGER) { log::set_max_level(LevelFilter::Info) }
+    if let Ok(()) = log::set_logger(&LOGGER) {
+        log::set_max_level(LevelFilter::Info)
+    }
 
     CONTEXT.set_position([0.0, 0.0, 0.0]).unwrap();
     CONTEXT.set_velocity([0.0, 0.0, 0.0]).unwrap();
