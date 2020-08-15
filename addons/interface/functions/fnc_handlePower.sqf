@@ -43,5 +43,5 @@ if (_toggle) then {
 private _color = [[1, 1, 1, 0.25], [1, 1, 1, 1]] select _powered;
 _ctrlPower ctrlSetTextColor _color;
 
-private _tooltip = [LSTRING(Off), LSTRING(On)] select _powered;
+private _tooltip = ["str_a3_rscdisplayconfigure_ca_mouseacceleration_off", "str_a3_rscdisplayconfigure_ca_mouseacceleration_on"] select _powered;
 _ctrlPower ctrlSetTooltip localize _tooltip;
