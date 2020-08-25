@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="Radio">
+    <Package name="Main">
+        <Key ID="STR_Radio_Main_Author">
+            <English>Dynulo</English>
+            <German>Dynulo</German>
+            <Polish>Dynulo</Polish>
+            <Portuguese>Dynulo</Portuguese>
+            <Russian>Dynulo</Russian>
+            <Czech>Dynulo</Czech>
+            <Spanish>Dynulo</Spanish>
+            <Italian>Dynulo</Italian>
+            <French>Dynulo</French>
+            <Korean>Dynulo</Korean>
+            <Japanese>Dynulo</Japanese>
+            <Chinese>Dynulo</Chinese>
+            <Chinesesimp>Dynulo</Chinesesimp>
+        </Key>
+        <Key ID="STR_Radio_Main_URL">
+            <English>https://github.com/Dynulo/ArmaRadio</English>
+            <German>https://github.com/Dynulo/ArmaRadio</German>
+            <Polish>https://github.com/Dynulo/ArmaRadio</Polish>
+            <Portuguese>https://github.com/Dynulo/ArmaRadio</Portuguese>
+            <Russian>https://github.com/Dynulo/ArmaRadio</Russian>
+            <Czech>https://github.com/Dynulo/ArmaRadio</Czech>
+            <Spanish>https://github.com/Dynulo/ArmaRadio</Spanish>
+            <Italian>https://github.com/Dynulo/ArmaRadio</Italian>
+            <French>https://github.com/Dynulo/ArmaRadio</French>
+            <Korean>https://github.com/Dynulo/ArmaRadio</Korean>
+            <Japanese>https://github.com/Dynulo/ArmaRadio</Japanese>
+            <Chinese>https://github.com/Dynulo/ArmaRadio</Chinese>
+            <Chinesesimp>https://github.com/Dynulo/ArmaRadio</Chinesesimp>
+        </Key>
+    </Package>
+</Project>

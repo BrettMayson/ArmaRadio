@@ -3,6 +3,9 @@
 params ["_source", "_gain"];
 
 private _sources = (allVariables GVAR(active));
-private _id = _sources select (_sources findIf { (GVAR(active) getVariable _x) isEqualTo _source });
+private _index = _sources findIf { (GVAR(active) getVariable _x) isEqualTo _source };
+if (_index == -1) exitWith {};
+
+private _id = _sources select _index;
 
 EXT callExtension ["gain", [_id, _gain]];
