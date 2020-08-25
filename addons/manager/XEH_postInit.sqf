@@ -31,5 +31,5 @@ addMissionEventHandler ["ExtensionCallback", {
 		LOG_SYS(_function,_data);
 	};
 	if !((tolower _name) isEqualTo "arma_radio") exitWith {};
-	systemChat format ["%1: %2", _function, _data];
+	// systemChat format ["%1: %2", _function, _data];
 }];

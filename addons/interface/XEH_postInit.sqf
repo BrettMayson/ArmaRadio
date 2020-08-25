@@ -4,7 +4,7 @@ if (!isClass (configFile >> "CfgPatches" >> "ace_interaction")) then {
 	[[
 		"FM Radio",
 		{
-			[cursorTarget] call FUNC(openInterface)
+			[cursorTarget] call FUNC(open)
 		},
 		"", 1, true, true, "",
 		'cursorTarget isKindOf "Land_FMradio_F"',
@@ -13,7 +13,7 @@ if (!isClass (configFile >> "CfgPatches" >> "ace_interaction")) then {
 	[[
 		"FM Radio",
 		{
-			[vehicle (call CBA_fnc_currentUnit)] call FUNC(openInterface)
+			[vehicle (call CBA_fnc_currentUnit)] call FUNC(open)
 		},
 		"", 1, true, true, "",
 		'vehicle (call CBA_fnc_currentUnit) isKindOf "Car"',
