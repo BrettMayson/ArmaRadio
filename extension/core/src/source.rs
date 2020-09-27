@@ -11,23 +11,21 @@ use reqwest::blocking::{Client, Response};
 // mpeg
 use simplemad::Decoder;
 
-use crate::{rv_send_callback, Vector3};
+use crate::Vector3;
 
 struct OnlineRadio {
     request: Response,
     counter: usize,
     interval: Option<usize>,
     initial: bool,
-    id: String,
 }
 impl OnlineRadio {
-    fn new(id: String, request: Response) -> Self {
+    fn new(request: Response) -> Self {
         Self {
             request,
             counter: 0,
             interval: None,
             initial: true,
-            id,
         }
     }
 }
@@ -58,11 +56,16 @@ impl Read for OnlineRadio {
                     }
                     for cap in RE_STREAM_TITLE.captures_iter(&metadata) {
                         println!("Title: {}", &cap[1]);
-                        arma_rs::rv_callback!("arma_radio", self.id.clone(), cap[1].to_string());
+                        // arma_rs::rv_callback!("arma_radio", self.id.clone(), cap[1].to_string());
+                        unsafe {
+                            if let Some(f) = &mut crate::CALLBACK {
+                                f(cap[1].to_string());
+                            }
+                        }
                     }
-                    if ret-length-1-index != 0 {
+                    if ret - length - 1 - index != 0 {
                         // println!("Moving {:?} items", (index..ret-length-1));
-                        for b in index..ret-length-1 {
+                        for b in index..ret - length - 1 {
                             buf[b] = buf[b + length + 1];
                         }
                         ret = ret - length - 1;
@@ -90,9 +93,8 @@ pub struct SoundSource {
     pub station: String,
 }
 impl SoundSource {
-    pub fn new<S: Into<String>>(id: S, station: S, gain: f32) -> SoundSource {
+    pub fn new<S: Into<String>>(station: S, gain: f32) -> SoundSource {
         let (tx, rx): (Sender<[f32; 7]>, Receiver<[f32; 7]>) = mpsc::channel();
-        let id = id.into();
         let station = station.into();
         let s = station.clone();
         std::thread::spawn(move || {
@@ -100,14 +102,22 @@ impl SoundSource {
             info!("Starting Radio. URL: {}", station);
             let mut request = client.get(&station);
             request = request.header("Icy-MetaData", "1");
-            let decoder = Decoder::decode(OnlineRadio::new(id, request.send().unwrap())).unwrap();
+            let decoder = Decoder::decode(OnlineRadio::new(request.send().unwrap())).unwrap();
             let stream = Arc::new(Mutex::new(crate::CONTEXT.new_streaming_source().unwrap()));
-            stream
+            if stream
                 .lock()
                 .unwrap()
-                .set_soft_spatialization(alto::SoftSourceSpatialization::Enabled);
-            stream.lock().unwrap().set_max_gain(2f32);
-            stream.lock().unwrap().set_gain(gain);
+                .set_soft_spatialization(alto::SoftSourceSpatialization::Enabled)
+                .is_err()
+            {
+                warn!("Error setting soft spatialization");
+            }
+            if stream.lock().unwrap().set_max_gain(2f32).is_err() {
+                warn!("Error setting max gain");
+            };
+            if stream.lock().unwrap().set_gain(gain).is_err() {
+                warn!("Error setting gain");
+            };
             // stream.lock().unwrap().set_rolloff_factor(1.0);
             let (txi, rxi): (Sender<()>, Receiver<()>) = mpsc::channel();
             let inner_stream = stream.clone();
@@ -128,7 +138,9 @@ impl SoundSource {
                     }
                     Err(TryRecvError::Empty) => {}
                     Err(TryRecvError::Disconnected) => {
-                        txi.send(());
+                        if txi.send(()).is_err() {
+                            warn!("Error sending txi empty");
+                        }
                         break;
                     }
                 }
@@ -144,12 +156,16 @@ impl SoundSource {
                         let mut samples: Vec<alto::Mono<f32>> = Vec::new();
                         for i in 0..frame.samples[0].len() {
                             samples.push(alto::Mono {
-                                center: (frame.samples[0][i].to_f32() + frame.samples[1][i].to_f32()) / 2.0f32
+                                center: (frame.samples[0][i].to_f32()
+                                    + frame.samples[1][i].to_f32())
+                                    / 2.0f32,
                             });
                         }
                         let buffer = if let Ok(mut buffer) = stream.lock().unwrap().unqueue_buffer()
                         {
-                            buffer.set_data(samples, frame.sample_rate as i32);
+                            if buffer.set_data(samples, frame.sample_rate as i32).is_err() {
+                                warn!("Error setting buffer sample data");
+                            }
                             buffer
                         } else {
                             crate::CONTEXT
@@ -188,28 +204,40 @@ impl SoundSource {
         self.position.x = position[0];
         self.position.y = position[1];
         self.position.z = position[2];
-        self.channel.send([
-            self.position.x,
-            self.position.y,
-            self.position.z,
-            self.velocity.x,
-            self.velocity.y,
-            self.velocity.z,
-            self.gain,
-        ]);
+        if self
+            .channel
+            .send([
+                self.position.x,
+                self.position.y,
+                self.position.z,
+                self.velocity.x,
+                self.velocity.y,
+                self.velocity.z,
+                self.gain,
+            ])
+            .is_err()
+        {
+            warn!("Error sending position update");
+        }
     }
 
     pub fn set_gain(&mut self, gain: f32) {
         self.gain = gain;
-        self.channel.send([
-            self.position.x,
-            self.position.y,
-            self.position.z,
-            self.velocity.x,
-            self.velocity.y,
-            self.velocity.z,
-            self.gain,
-        ]);
+        if self
+            .channel
+            .send([
+                self.position.x,
+                self.position.y,
+                self.position.z,
+                self.velocity.x,
+                self.velocity.y,
+                self.velocity.z,
+                self.gain,
+            ])
+            .is_err()
+        {
+            warn!("error sending gain update");
+        }
     }
 
     pub fn get_position(&self) -> Vector3 {

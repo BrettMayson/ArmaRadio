@@ -13,6 +13,7 @@ if (hasInterface) then {
 		EXT callExtension ["destroy", [_id]];
 		GVAR(active) setVariable [_id, nil];
 		GVAR(jips) = GVAR(jips) - [_id];
+		[_id] call CBA_fnc_removeGlobalEventJIP;
 	}] call CBA_fnc_addEventHandler;
 
 	[QGVAR(volume), {

@@ -1,0 +1,15 @@
+[package]
+name = "dynulo_radio"
+version = "0.1.0"
+authors = ["Brett <brett@bmandesigns.com>"]
+edition = "2018"
+
+[dependencies]
+alto = "3.0"
+lazy_static = "1.4"
+log = "0.4"
+rand = "0.7"
+regex = "1.3"
+reqwest = { version = "0.10", features = ["blocking"] }
+rust-embed = "5.6.0"
+simplemad = "0.9.0"

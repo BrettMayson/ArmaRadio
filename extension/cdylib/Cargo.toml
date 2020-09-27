@@ -1,0 +1,15 @@
+[package]
+name = "dynulo_radio_cdylib"
+version = "0.4.1"
+authors = ["Dynulo"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# arma-rs = { git = "https://github.com/synixebrett/arma-rs", branch = "master" }
+arma-rs = { path = "../../../arma-rs/core" }
+dynulo_radio = { path = "../core" }
+
+log = "0.4"
