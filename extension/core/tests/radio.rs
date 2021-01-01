@@ -10,4 +10,6 @@ fn radio() {
     );
     dynulo_radio::pos("test", 0f32, 0f32, 0f32);
     std::thread::sleep(Duration::from_secs(5));
+    dynulo_radio::destroy("test");
+    std::thread::sleep(Duration::from_secs(2));
 }

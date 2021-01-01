@@ -55,7 +55,7 @@ impl Read for OnlineRadio {
                         static ref RE_STREAM_TITLE: Regex = Regex::new("(?m)StreamTitle='(.+?)';").unwrap();
                     }
                     for cap in RE_STREAM_TITLE.captures_iter(&metadata) {
-                        println!("Title: {}", &cap[1]);
+                        // println!("Title: {}", &cap[1]);
                         // arma_rs::rv_callback!("arma_radio", self.id.clone(), cap[1].to_string());
                         unsafe {
                             if let Some(f) = &mut crate::CALLBACK {
@@ -93,7 +93,7 @@ pub struct SoundSource {
     pub station: String,
 }
 impl SoundSource {
-    pub fn new<S: Into<String>>(station: S, gain: f32) -> SoundSource {
+    pub fn new<S: Into<String>>(station: S, gain: f32) -> Self {
         let (tx, rx): (Sender<[f32; 7]>, Receiver<[f32; 7]>) = mpsc::channel();
         let station = station.into();
         let s = station.clone();

@@ -90,7 +90,7 @@ pub fn create<S: Into<String>>(source: S, sid: S, gain: f32) {
     SOURCES
         .lock()
         .unwrap()
-        .insert(sid.clone(), SoundSource::new(source.into(), gain));
+        .insert(sid, SoundSource::new(source.into(), gain));
 }
 
 pub fn destroy<S: Into<String>>(sid: S) -> bool {
