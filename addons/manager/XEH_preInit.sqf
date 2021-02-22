@@ -17,10 +17,10 @@ EXT callExtension "";
 	0,
 	{
 		EXT callExtension ["gain_multiplier", [_this]];
-		private _sources = (keys GVAR(sources));
+		private _sources = keys GVAR(sources);
 		{
 			// Reset the volume to apply the multiplier
-			EXT callExtension ["gain", [_x, (_sources getOrDefault [_x, objNull]) getVariable [QGVAR(volume), _gain, true]]];
+			EXT callExtension ["gain", [_x, (GVAR(sources) getOrDefault [_x, objNull]) getVariable [QGVAR(volume), _gain, true]]];
 		} forEach _sources;
 	}
 ] call CBA_fnc_addSetting;

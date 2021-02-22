@@ -31,8 +31,6 @@ private _inZeus = !(isNull (findDisplay 312));
 		};
 		EXT callExtension ["pos", _data];
 	} else {
-		if !(_souce isEqualTo objNull) then {
-			[QGVAR(stop), [_x]] call CBA_fnc_localEvent;
-		};
+		[QGVAR(stop), [_x]] call CBA_fnc_localEvent;
 	};
 } forEach keys GVAR(sources);
