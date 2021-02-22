@@ -10,7 +10,7 @@
  * None
  *
  * Example:
- * [DISPLAY] call radio_interface_fnc_updateInfo
+ * [DISPLAY] call live_radiointerface_fnc_updateInfo
  *
  * Public: No
  */

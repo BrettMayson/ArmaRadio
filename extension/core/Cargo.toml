@@ -1,7 +1,7 @@
 [package]
-name = "dynulo_radio"
-version = "0.1.0"
-authors = ["Brett <brett@bmandesigns.com>"]
+name = "live_radio"
+version = "0.2.0"
+authors = ["Brett <brett@mayson.io>"]
 edition = "2018"
 
 [dependencies]

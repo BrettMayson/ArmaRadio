@@ -1,9 +1,9 @@
-name = "ArmaRadio"
-prefix = "radio"
+name = "Live Radio"
+prefix = "live_radio"
 author = "Brett"
-mainprefix = "dynulo"
+mainprefix = "z"
 include = ["./include"]
-files = ["mod.cpp", "dynulo_radio.dll", "dynulo_radio_x64.dll"]
+files = ["mod.cpp", "live_radio.dll", "live_radio_x64.dll"]
 template = "cba"
 
 postbuild = ["!extension"]
@@ -14,8 +14,8 @@ show_output = true
 steps_windows = [
     "rustup target add i686-pc-windows-msvc",
     "cd extension && cargo build --release && cargo build --release --target=i686-pc-windows-msvc",
-    "copy extension\\target\\release\\dynulo_radio_cdylib.dll dynulo_radio_x64.dll",
-    "copy extension\\target\\i686-pc-windows-msvc\\release\\dynulo_radio_cdylib.dll dynulo_radio.dll",
+    "copy extension\\target\\release\\live_radio_cdylib.dll live_radio_x64.dll",
+    "copy extension\\target\\i686-pc-windows-msvc\\release\\live_radio_cdylib.dll live_radio.dll",
 ]
 steps_linux = [
     "echo \"Unable to build extension on Linux\""

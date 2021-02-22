@@ -56,7 +56,7 @@ impl Read for OnlineRadio {
                     }
                     for cap in RE_STREAM_TITLE.captures_iter(&metadata) {
                         // println!("Title: {}", &cap[1]);
-                        // arma_rs::rv_callback!("arma_radio", self.id.clone(), cap[1].to_string());
+                        // arma_rs::rv_callback!("live_radio", self.id.clone(), cap[1].to_string());
                         unsafe {
                             if let Some(f) = &mut crate::CALLBACK {
                                 f(cap[1].to_string());

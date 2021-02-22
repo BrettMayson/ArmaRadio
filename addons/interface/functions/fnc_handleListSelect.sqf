@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [CONTROL, 0] call radio_interface_fnc_handleListSelect
+ * [CONTROL, 0] call live_radiointerface_fnc_handleListSelect
  *
  * Public: No
  */

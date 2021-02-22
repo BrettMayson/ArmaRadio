@@ -6,8 +6,8 @@ class CfgPatches {
     units[] = {};
     weapons[] = {};
     requiredVersion = REQUIRED_VERSION;
-    requiredAddons[] = {"radio_main"};
-    author = "SynixeBrett";
+    requiredAddons[] = {"live_radio_main"};
+    author = "BrettMayson";
     VERSION_CONFIG;
   };
 };

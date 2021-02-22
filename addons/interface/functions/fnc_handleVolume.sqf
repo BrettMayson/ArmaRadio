@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [DISPLAY, 0.5] call radio_interface_fnc_handleVolume
+ * [DISPLAY, 0.5] call live_radiointerface_fnc_handleVolume
  *
  * Public: No
  */

@@ -6,9 +6,9 @@ class CfgPatches {
         units[] = {};
         weapons[] = {};
         requiredVersion = REQUIRED_VERSION;
-        requiredAddons[] = {"radio_manager"};
+        requiredAddons[] = {"live_radio_manager"};
         author = ECSTRING(main,Author);
-        authors[] = {"SynixeBrett", "mharis001"};
+        authors[] = {"BrettMayson", "mharis001"};
         url = ECSTRING(main,URL);
         VERSION_CONFIG;
     };

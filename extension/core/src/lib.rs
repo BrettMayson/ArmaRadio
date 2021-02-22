@@ -24,7 +24,7 @@ lazy_static::lazy_static! {
         // OpenAL needs to live next to Arma
         let openal = std::path::Path::new("OpenAL32.dll");
         if !openal.exists() {
-            // let mut resp = reqwest::blocking::get("https://github.com/Dynulo/ArmaRadio/releases/download/0.0/OpenAL32.dll").expect("request failed");
+            // let mut resp = reqwest::blocking::get("https://github.com/BrettMayson/ArmaRadio/releases/download/0.0/OpenAL32.dll").expect("request failed");
             // let mut out = std::fs::File::create(&openal).expect("failed to create file");
             // std::io::copy(&mut resp, &mut out).expect("failed to copy content");
             let dll = Assets::get("OpenAL32.dll").unwrap();

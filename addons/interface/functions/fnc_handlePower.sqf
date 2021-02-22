@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [CONTROL, true] call radio_interface_fnc_handlePower
+ * [CONTROL, true] call live_radiointerface_fnc_handlePower
  *
  * Public: No
  */

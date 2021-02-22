@@ -1,1 +1,1 @@
-#include "\dynulo\radio\addons\interface\script_component.hpp"
+#include "\z\live_radio\addons\interface\script_component.hpp"

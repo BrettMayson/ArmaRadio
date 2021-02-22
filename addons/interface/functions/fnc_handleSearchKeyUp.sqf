@@ -10,7 +10,7 @@
  * None
  *
  * Example:
- * [CONTROL] call radio_interface_fnc_handleSearchKeyUp
+ * [CONTROL] call live_radiointerface_fnc_handleSearchKeyUp
  *
  * Public: No
  */

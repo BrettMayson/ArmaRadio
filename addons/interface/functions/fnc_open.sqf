@@ -10,7 +10,7 @@
  * None
  *
  * Example:
- * [_object] call radio_interface_fnc_open
+ * [_object] call live_radiointerface_fnc_open
  *
  * Public: No
  */
