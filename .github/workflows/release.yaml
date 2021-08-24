@@ -54,15 +54,15 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: armapmc.zip
-          path: 'releases/radio.zip'
+          path: 'releases/live_radio.zip'
       # Upload to GitHub
       - uses: softprops/action-gh-release@v1
         with:
-          files: 'releases/radio.zip'
+          files: 'releases/live_radio.zip'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Upload to Steam Workshop
-      - run: unzip releases/radio.zip -d ./unzipped
+      - run: unzip releases/live_radio.zip -d ./unzipped
       - uses: arma-actions/workshop-upload@v1
         with:
           itemId: '2172022102' # Id of item to update

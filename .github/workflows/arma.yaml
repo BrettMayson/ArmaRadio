@@ -54,5 +54,5 @@ jobs:
           command: 'build --release'
       - uses: actions/upload-artifact@v2
         with:
-          name: radio.zip
-          path: 'releases/radio.zip'
+          name: live_radio.zip
+          path: 'releases/live_radio.zip'
