@@ -8,8 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-# arma-rs = { git = "https://github.com/BrettMayson/arma-rs", branch = "master" }
-arma-rs = { path = "../../../arma-rs/core" }
+arma-rs = { git = "https://github.com/BrettMayson/arma-rs", branch = "expirement" }
 live_radio = { path = "../core" }
 
 lazy_static = "1.4"

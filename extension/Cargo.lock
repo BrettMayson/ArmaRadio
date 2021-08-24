@@ -36,6 +36,7 @@ dependencies = [
 [[package]]
 name = "arma-rs"
 version = "0.3.0"
+source = "git+https://github.com/BrettMayson/arma-rs?branch=expirement#306e3bf3420f2eb6d4f05b75571247c648a88253"
 dependencies = [
  "arma-rs-codegen",
  "libc 0.2.100",
@@ -44,6 +45,7 @@ dependencies = [
 [[package]]
 name = "arma-rs-codegen"
 version = "0.2.0"
+source = "git+https://github.com/BrettMayson/arma-rs?branch=expirement#306e3bf3420f2eb6d4f05b75571247c648a88253"
 dependencies = [
  "lazy_static 1.4.0",
  "proc-macro2",
