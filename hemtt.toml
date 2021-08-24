@@ -7,7 +7,7 @@ files = ["mod.cpp", "live_radio.dll", "live_radio_x64.dll"]
 template = "cba"
 
 postbuild = ["!extension"]
-releasebuild = ["@zip {{key_name}}"]
+releasebuild = ["@zip {{modname}}", "@zip {{key_name}}"]
 
 [scripts.extension]
 show_output = true
