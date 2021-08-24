@@ -5,6 +5,7 @@ authors = ["BrettMayson"]
 edition = "2018"
 
 [lib]
+name = "live_radio"
 crate-type = ["cdylib"]
 
 [dependencies]
