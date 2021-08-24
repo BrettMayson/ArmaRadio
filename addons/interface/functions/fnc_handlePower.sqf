@@ -28,7 +28,7 @@ if (_toggle) then {
     // Start playing the selected station if the radio is powered on, otherwise turn off
     private _url = if (_powered) then {
         private _ctrlList = _display displayCtrl IDC_LIST;
-        (_ctrlList getVariable str lbCurSel _ctrlList) param [3, ""]
+        (_ctrlList getVariable str lbCurSel _ctrlList) param [2, ""]
     } else {
         ""
     };

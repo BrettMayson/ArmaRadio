@@ -3,33 +3,9 @@
     <Package name="Main">
         <Key ID="STR_Radio_Main_Author">
             <English>BrettMayson</English>
-            <German>BrettMayson</German>
-            <Polish>BrettMayson</Polish>
-            <Portuguese>BrettMayson</Portuguese>
-            <Russian>BrettMayson</Russian>
-            <Czech>BrettMayson</Czech>
-            <Spanish>BrettMayson</Spanish>
-            <Italian>BrettMayson</Italian>
-            <French>BrettMayson</French>
-            <Korean>BrettMayson</Korean>
-            <Japanese>BrettMayson</Japanese>
-            <Chinese>BrettMayson</Chinese>
-            <Chinesesimp>BrettMayson</Chinesesimp>
         </Key>
         <Key ID="STR_Radio_Main_URL">
             <English>https://github.com/BrettMayson/ArmaRadio</English>
-            <German>https://github.com/BrettMayson/ArmaRadio</German>
-            <Polish>https://github.com/BrettMayson/ArmaRadio</Polish>
-            <Portuguese>https://github.com/BrettMayson/ArmaRadio</Portuguese>
-            <Russian>https://github.com/BrettMayson/ArmaRadio</Russian>
-            <Czech>https://github.com/BrettMayson/ArmaRadio</Czech>
-            <Spanish>https://github.com/BrettMayson/ArmaRadio</Spanish>
-            <Italian>https://github.com/BrettMayson/ArmaRadio</Italian>
-            <French>https://github.com/BrettMayson/ArmaRadio</French>
-            <Korean>https://github.com/BrettMayson/ArmaRadio</Korean>
-            <Japanese>https://github.com/BrettMayson/ArmaRadio</Japanese>
-            <Chinese>https://github.com/BrettMayson/ArmaRadio</Chinese>
-            <Chinesesimp>https://github.com/BrettMayson/ArmaRadio</Chinesesimp>
         </Key>
     </Package>
 </Project>

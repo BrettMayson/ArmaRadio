@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-use alto::Alto;
+use alto::{Alto, DeviceObject};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use rust_embed::RustEmbed;
@@ -24,20 +24,17 @@ lazy_static::lazy_static! {
         // OpenAL needs to live next to Arma
         let openal = std::path::Path::new("OpenAL32.dll");
         if !openal.exists() {
-            // let mut resp = reqwest::blocking::get("https://github.com/BrettMayson/ArmaRadio/releases/download/0.0/OpenAL32.dll").expect("request failed");
-            // let mut out = std::fs::File::create(&openal).expect("failed to create file");
-            // std::io::copy(&mut resp, &mut out).expect("failed to copy content");
             let dll = Assets::get("OpenAL32.dll").unwrap();
             info!("Creating OpenAL.dll");
-            let mut out = std::fs::File::create(&openal).expect({
+            let mut out = std::fs::File::create(&openal).unwrap_or_else(|_| {
                 println!("Failed to create OpenAL32.dll");
                 error!("Failed to create OpenAL32.dll");
-                "Failed to create OpenAL32.dll"
+                panic!("Failed to create OpenAL32.dll");
             });
-            std::io::copy(&mut std::io::Cursor::new(dll), &mut out).expect({
+            std::io::copy(&mut std::io::Cursor::new(dll.data), &mut out).unwrap_or_else(|_| {
                 println!("Failed to write to OpenAL32.dll");
                 error!("Failed to write to OpenAL32.dll");
-                "Failed to write to OpenAL32.dll"
+                panic!("Failed to write to OpenAL32.dll");
             });
         }
         Alto::load_default().unwrap()
@@ -45,13 +42,12 @@ lazy_static::lazy_static! {
     static ref SOURCES: Mutex<HashMap<String, SoundSource>> = Mutex::new(HashMap::new());
     static ref CONTEXT: alto::Context = {
         let device = AL.open(None).unwrap();
-        use alto::DeviceObject;
         debug!("{:?}", device.specifier());
         device.new_context(None).unwrap()
     };
 }
 
-static mut CALLBACK: Option<Box<dyn FnMut(String)>> = None;
+pub static mut CALLBACK: Option<unsafe fn(*const i8, *const i8, *const i8)> = None;
 
 pub fn init() {
     CONTEXT.set_position([0.0, 0.0, 0.0]).unwrap();
@@ -90,7 +86,7 @@ pub fn create<S: Into<String>>(source: S, sid: S, gain: f32) {
     SOURCES
         .lock()
         .unwrap()
-        .insert(sid, SoundSource::new(source.into(), gain));
+        .insert(sid.clone(), SoundSource::new(sid, source.into(), gain));
 }
 
 pub fn destroy<S: Into<String>>(sid: S) -> bool {

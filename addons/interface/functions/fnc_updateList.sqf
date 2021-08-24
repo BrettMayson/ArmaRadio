@@ -35,14 +35,14 @@ lbClear _ctrlList;
 _ctrlList lbSetCurSel -1;
 
 {
-    _x params ["_name", "_description", "_picture", "_url"];
+    _x params ["_name", "_picture", "_url"];
 
     private _isActive = _url isEqualTo _activeURL;
 
     // Add currently playing station regardless of filter
     if (_isActive || {_filter in toLower _name}) then {
         private _index = _ctrlList lbAdd _name;
-        _ctrlList setVariable [str _index, [_name, _description, _picture, _url]];
+        _ctrlList setVariable [str _index, [_name, _picture, _url]];
 
         if (_isActive) then {
             _ctrlList lbSetCurSel _index;

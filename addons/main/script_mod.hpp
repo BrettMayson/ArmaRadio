@@ -12,7 +12,7 @@
 #define VERSION_AR  MAJOR,MINOR,PATCH,BUILD
 
 // MINIMAL required version for the Mod. Components can specify others..
-#define REQUIRED_VERSION 2.02
+#define REQUIRED_VERSION 2.04
 
 #ifdef COMPONENT_BEAUTIFIED
     #define COMPONENT_NAME QUOTE(Live Radio - COMPONENT_BEAUTIFIED)

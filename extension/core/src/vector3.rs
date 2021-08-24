@@ -5,12 +5,12 @@ pub struct Vector3 {
     pub z: f32,
 }
 impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
-        Vector3 { x, y, z }
+    pub const fn new(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z }
     }
 }
 impl Clone for Vector3 {
-    fn clone(&self) -> Vector3 {
+    fn clone(&self) -> Self {
         *self
     }
 }

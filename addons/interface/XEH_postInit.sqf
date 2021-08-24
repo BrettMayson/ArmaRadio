@@ -20,3 +20,7 @@ if (!isClass (configFile >> "CfgPatches" >> "ace_interaction")) then {
 		5
 	]] call CBA_fnc_addPlayerAction;
 };
+
+[QEGVAR(manager,metadataUpdated), {
+	[uiNamespace getVariable QGVAR(display)] call FUNC(updateInfo);
+}] call CBA_fnc_addEventHandler;

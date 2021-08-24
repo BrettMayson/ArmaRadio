@@ -1,7 +1,7 @@
 class CfgRadioStations {
 	class BBCRadio1 {
 		name = "BBC Radio 1";
-		url = "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_p";
+		url = "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one";
 	};
 	class ClassicRock109 {
 		name = "Classic Rock 109";

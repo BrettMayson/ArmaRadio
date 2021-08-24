@@ -14,14 +14,16 @@ use simplemad::Decoder;
 use crate::Vector3;
 
 struct OnlineRadio {
+    id: String,
     request: Response,
     counter: usize,
     interval: Option<usize>,
     initial: bool,
 }
 impl OnlineRadio {
-    fn new(request: Response) -> Self {
+    const fn new(request: Response, id: String) -> Self {
         Self {
+            id,
             request,
             counter: 0,
             interval: None,
@@ -45,7 +47,7 @@ impl Read for OnlineRadio {
             if self.counter > i {
                 // println!("Counter: {}, Ret: {}", self.counter, ret);
                 let index = i - (self.counter - ret);
-                let length = buf[index] as usize * 16usize;
+                let length = buf[index] as usize * 16_usize;
                 // println!("Metadata Length: {}", length);
                 if index + 1 + length >= buf.len() {
                     error!("Metadata is cut off");
@@ -57,24 +59,31 @@ impl Read for OnlineRadio {
                     for cap in RE_STREAM_TITLE.captures_iter(&metadata) {
                         // println!("Title: {}", &cap[1]);
                         // arma_rs::rv_callback!("live_radio", self.id.clone(), cap[1].to_string());
+                        info!("Received title: {:?}", cap[1].to_string());
                         unsafe {
                             if let Some(f) = &mut crate::CALLBACK {
-                                f(cap[1].to_string());
+                                f(
+                                    std::ffi::CString::new("live_radio").unwrap().into_raw(),
+                                    std::ffi::CString::new("title").unwrap().into_raw(),
+                                    std::ffi::CString::new(format!(
+                                        r#"["{}","{}"]"#, self.id, &cap[1]
+                                    ).as_bytes()).unwrap().into_raw(),
+                                );
                             }
                         }
                     }
-                    if ret - length - 1 - index != 0 {
+                    if ret - length - 1 - index == 0 {
+                        self.counter = ret - length - 1 - index;
+                        if ret == 1 {
+                            ret = self.read(buf)?;
+                        }
+                    } else {
                         // println!("Moving {:?} items", (index..ret-length-1));
                         for b in index..ret - length - 1 {
                             buf[b] = buf[b + length + 1];
                         }
                         ret = ret - length - 1;
                         self.counter = ret - index;
-                    } else {
-                        self.counter = ret - length - 1 - index;
-                        if ret == 1 {
-                            ret = self.read(buf)?;
-                        }
                     }
                 }
             }
@@ -93,7 +102,7 @@ pub struct SoundSource {
     pub station: String,
 }
 impl SoundSource {
-    pub fn new<S: Into<String>>(station: S, gain: f32) -> Self {
+    pub fn new<S: Into<String>>(id: String, station: S, gain: f32) -> Self {
         let (tx, rx): (Sender<[f32; 7]>, Receiver<[f32; 7]>) = mpsc::channel();
         let station = station.into();
         let s = station.clone();
@@ -102,7 +111,7 @@ impl SoundSource {
             info!("Starting Radio. URL: {}", station);
             let mut request = client.get(&station);
             request = request.header("Icy-MetaData", "1");
-            let decoder = Decoder::decode(OnlineRadio::new(request.send().unwrap())).unwrap();
+            let decoder = Decoder::decode(OnlineRadio::new(request.send().unwrap(), id)).unwrap();
             let stream = Arc::new(Mutex::new(crate::CONTEXT.new_streaming_source().unwrap()));
             if stream
                 .lock()
@@ -112,7 +121,7 @@ impl SoundSource {
             {
                 warn!("Error setting soft spatialization");
             }
-            if stream.lock().unwrap().set_max_gain(2f32).is_err() {
+            if stream.lock().unwrap().set_max_gain(2_f32).is_err() {
                 warn!("Error setting max gain");
             };
             if stream.lock().unwrap().set_gain(gain).is_err() {
@@ -158,7 +167,7 @@ impl SoundSource {
                             samples.push(alto::Mono {
                                 center: (frame.samples[0][i].to_f32()
                                     + frame.samples[1][i].to_f32())
-                                    / 2.0f32,
+                                    / 2.0_f32,
                             });
                         }
                         let buffer = if let Ok(mut buffer) = stream.lock().unwrap().unqueue_buffer()
@@ -180,7 +189,7 @@ impl SoundSource {
                 }
             }
         });
-        SoundSource {
+        Self {
             position: Vector3::new(0.0, 0.0, 0.0),
             velocity: Vector3::new(0.0, 0.0, 0.0),
             gain,
@@ -240,10 +249,10 @@ impl SoundSource {
         }
     }
 
-    pub fn get_position(&self) -> Vector3 {
+    pub const fn get_position(&self) -> Vector3 {
         self.position
     }
-    pub fn get_velocity(&self) -> Vector3 {
+    pub const fn get_velocity(&self) -> Vector3 {
         self.velocity
     }
 }

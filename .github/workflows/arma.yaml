@@ -1,0 +1,58 @@
+name: Arma
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_extension:
+    strategy:
+      matrix:
+        arrays: [
+          os: { tag: "windows-latest", lib: "live_radio.dll", target: "i686-pc-windows-msvc" },
+          os: { tag: "windows-latest", lib: "live_radio.dll", target: "x86_64-pc-windows-msvc" },
+        ]
+    runs-on: ${{ matrix.arrays.os.tag }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Install latest
+        uses: actions-rs/toolchain@v1
+        with:
+          target: ${{ matrix.arrays.os.target }}
+          toolchain: stable
+      - name: Cargo Build
+        run: cd extension && cargo build --release --target ${{ matrix.arrays.os.target }}
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.arrays.os.target }}
+          path: extension/target/${{ matrix.arrays.os.target }}/release/${{ matrix.arrays.os.lib }}
+          if-no-files-found: error
+          retention-days: 30
+  package:
+    needs: build_extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      
+      - uses: actions/download-artifact@v2
+        with:
+          name: x86_64-pc-windows-msvc
+      - run: mv live_radio.dll live_radio_x64.dll
+      - uses: actions/download-artifact@v2
+        with:
+          name: i686-pc-windows-msvc
+
+      - name: Set VERSION env
+        run: echo VERSION=${GITHUB_REF:11} >> $GITHUB_ENV
+      - name: Build addon with HEMTT
+        uses: arma-actions/hemtt@master
+        with:
+          command: 'build --release'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: radio.zip
+          path: 'releases/radio.zip'

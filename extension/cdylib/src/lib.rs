@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::RwLock;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
@@ -7,7 +7,7 @@ use arma_rs::{rv, rv_callback, rv_handler};
 static mut TIMESTAMP: Option<SystemTime> = None;
 
 lazy_static::lazy_static! {
-    static ref GAIN_MULTIPLIER: Mutex<f32> = Mutex::new(0.5);
+    static ref GAIN_MULTIPLIER: RwLock<f32> = RwLock::new(0.5);
 }
 
 #[rv]
@@ -36,7 +36,7 @@ fn id() -> String {
 
 #[rv]
 fn create(source: String, sid: String, gain: f32) {
-    live_radio::create(source, sid, gain * *GAIN_MULTIPLIER.lock().unwrap());
+    live_radio::create(source, sid, gain * *GAIN_MULTIPLIER.read().unwrap());
 }
 
 #[rv]
@@ -51,14 +51,13 @@ fn pos(sid: String, x: f32, y: f32, z: f32) {
 
 #[rv]
 fn gain(sid: String, gain: f32) {
-    live_radio::gain(&sid, gain * *GAIN_MULTIPLIER.lock().unwrap())
+    live_radio::gain(&sid, gain * *GAIN_MULTIPLIER.read().unwrap())
 }
 
 #[rv]
 fn gain_multiplier(gain: f32) {
-    *GAIN_MULTIPLIER.lock().unwrap() = gain;
+    *GAIN_MULTIPLIER.write().unwrap() = gain;
 }
-
 
 #[rv]
 fn orientation(dx: f32, dy: f32, dz: f32, ux: f32, uy: f32, uz: f32) {
@@ -94,6 +93,9 @@ static LOGGER: ArmaLogger = ArmaLogger;
 
 #[rv_handler]
 fn init() {
+    unsafe {
+        live_radio::CALLBACK = Some(rv_send_callback);
+    }
     if let Ok(()) = log::set_logger(&LOGGER) {
         log::set_max_level(LevelFilter::Info)
     }

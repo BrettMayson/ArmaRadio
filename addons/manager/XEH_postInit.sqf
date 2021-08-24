@@ -5,12 +5,14 @@ if (hasInterface) then {
 		params ["_url", "_id", "_source"];
 		EXT callExtension ["create", [_url, _id, _source getVariable [QGVAR(volume), 1]]];
 		GVAR(sources) set [_id, _source];
+		[QGVAR(metadataUpdated), [_id, ""]] call CBA_fnc_localEvent;
 	}] call CBA_fnc_addEventHandler;
 
 	[QGVAR(stop), {
 		params ["_id"];
 		EXT callExtension ["destroy", [_id]];
 		GVAR(sources) deleteAt _id;
+		GVAR(sourcesTitles) deleteAt _id;
 	}] call CBA_fnc_addEventHandler;
 
 	[QGVAR(volume), {
@@ -37,4 +39,11 @@ addMissionEventHandler ["ExtensionCallback", {
 	};
 	if !((tolower _name) isEqualTo "live_radio") exitWith {};
 	// systemChat format ["%1: %2", _function, _data];
+	switch (_function) do {
+		case "title": {
+			(parseSimpleArray _data) params ["_id", "_title"];
+			GVAR(sourcesTitles) set [_id, _title];
+			[QGVAR(metadataUpdated), [_id, _title]] call CBA_fnc_localEvent;
+		};
+	};
 }];
