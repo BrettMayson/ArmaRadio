@@ -66,7 +66,7 @@ jobs:
       - uses: arma-actions/workshop-upload@v1
         with:
           itemId: '2172022102' # Id of item to update
-          contentPath: 'unzipped'
+          contentPath: 'unzipped/@live_radio'
           changelog: 'https://github.com/BrettMayson/ArmaRadio/releases/tag/v${{ env.VERSION }}'
         env:
           STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
