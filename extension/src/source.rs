@@ -1,98 +1,25 @@
-use std::io::{self, Read};
-use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::SystemTime;
+use std::{
+    collections::HashMap,
+    sync::{
+        mpsc::{self, Receiver, Sender, TryRecvError},
+        Arc, Mutex, RwLock,
+    },
+    time::SystemTime,
+};
 
 use alto::Source;
-use regex::Regex;
-use reqwest::blocking::{Client, Response};
-
-// mpeg
+use arma_rs::{Context, Group};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use reqwest::blocking::Client;
 use simplemad::Decoder;
 
-use crate::Vector3;
+use crate::{listener::LISTENER, station::Station, vector3::Vector3};
 
-struct OnlineRadio {
-    id: String,
-    request: Response,
-    counter: usize,
-    interval: Option<usize>,
-    initial: bool,
-}
-impl OnlineRadio {
-    const fn new(request: Response, id: String) -> Self {
-        Self {
-            id,
-            request,
-            counter: 0,
-            interval: None,
-            initial: true,
-        }
-    }
-}
-impl Read for OnlineRadio {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        if self.initial {
-            self.initial = false;
-            // println!("Headers: {:?}", self.request.headers());
-            if let Some(interval) = self.request.headers().get("icy-metaint") {
-                self.interval = Some(interval.to_str().unwrap().parse::<usize>().unwrap());
-                // println!("Interval is set to: {:?}", self.interval);
-            }
-        }
-        let mut ret = self.request.read(buf)?;
-        if let Some(i) = self.interval {
-            self.counter += ret;
-            if self.counter > i {
-                // println!("Counter: {}, Ret: {}", self.counter, ret);
-                let index = i - (self.counter - ret);
-                let length = buf[index] as usize * 16_usize;
-                // println!("Metadata Length: {}", length);
-                if index + 1 + length >= buf.len() {
-                    error!("Metadata is cut off");
-                } else {
-                    let metadata = String::from_utf8_lossy(&buf[(index + 1)..(index + 1 + length)]);
-                    lazy_static::lazy_static! {
-                        static ref RE_STREAM_TITLE: Regex = Regex::new("(?m)StreamTitle='(.+?)';").unwrap();
-                    }
-                    for cap in RE_STREAM_TITLE.captures_iter(&metadata) {
-                        // println!("Title: {}", &cap[1]);
-                        // arma_rs::rv_callback!("live_radio", self.id.clone(), cap[1].to_string());
-                        info!("Received title: {:?}", cap[1].to_string());
-                        unsafe {
-                            if let Some(f) = &mut crate::CALLBACK {
-                                f(
-                                    std::ffi::CString::new("live_radio").unwrap().into_raw(),
-                                    std::ffi::CString::new("title").unwrap().into_raw(),
-                                    std::ffi::CString::new(format!(
-                                        r#"["{}","{}"]"#, self.id, &cap[1]
-                                    ).as_bytes()).unwrap().into_raw(),
-                                );
-                            }
-                        }
-                    }
-                    if ret - length - 1 - index == 0 {
-                        self.counter = ret - length - 1 - index;
-                        if ret == 1 {
-                            ret = self.read(buf)?;
-                        }
-                    } else {
-                        // println!("Moving {:?} items", (index..ret-length-1));
-                        for b in index..ret - length - 1 {
-                            buf[b] = buf[b + length + 1];
-                        }
-                        ret = ret - length - 1;
-                        self.counter = ret - index;
-                    }
-                }
-            }
-        }
-        Ok(ret)
-    }
+lazy_static::lazy_static! {
+    static ref SOURCES: RwLock<HashMap<String, Mutex<SoundSource>>> = RwLock::new(HashMap::new());
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct SoundSource {
     position: Vector3,
     velocity: Vector3,
@@ -101,18 +28,18 @@ pub struct SoundSource {
     channel: Sender<[f32; 7]>,
     pub station: String,
 }
+
 impl SoundSource {
-    pub fn new<S: Into<String>>(id: String, station: S, gain: f32) -> Self {
+    pub fn new(ctx: Context, id: String, station: String, gain: f32) -> Self {
         let (tx, rx): (Sender<[f32; 7]>, Receiver<[f32; 7]>) = mpsc::channel();
-        let station = station.into();
         let s = station.clone();
         std::thread::spawn(move || {
             let client = Client::new();
             info!("Starting Radio. URL: {}", station);
             let mut request = client.get(&station);
             request = request.header("Icy-MetaData", "1");
-            let decoder = Decoder::decode(OnlineRadio::new(request.send().unwrap(), id)).unwrap();
-            let stream = Arc::new(Mutex::new(crate::CONTEXT.new_streaming_source().unwrap()));
+            let decoder = Decoder::decode(Station::new(ctx, request.send().unwrap(), id)).unwrap();
+            let stream = Arc::new(Mutex::new(LISTENER.new_streaming_source().unwrap()));
             if stream
                 .lock()
                 .unwrap()
@@ -130,7 +57,7 @@ impl SoundSource {
             // stream.lock().unwrap().set_rolloff_factor(1.0);
             let (txi, rxi): (Sender<()>, Receiver<()>) = mpsc::channel();
             let inner_stream = stream.clone();
-            thread::spawn(move || loop {
+            std::thread::spawn(move || loop {
                 match rx.try_recv() {
                     Ok(message) => {
                         inner_stream
@@ -155,7 +82,7 @@ impl SoundSource {
                 }
             });
             for decoding_result in decoder {
-                if let Err(TryRecvError::Disconnected) = rxi.try_recv() {
+                if Err(TryRecvError::Disconnected) == rxi.try_recv() {
                     info!("Dying");
                     break;
                 }
@@ -177,7 +104,7 @@ impl SoundSource {
                             }
                             buffer
                         } else {
-                            crate::CONTEXT
+                            LISTENER
                                 .new_buffer(samples, frame.sample_rate as i32)
                                 .unwrap()
                         };
@@ -248,11 +175,52 @@ impl SoundSource {
             warn!("error sending gain update");
         }
     }
+}
 
-    pub const fn get_position(&self) -> Vector3 {
-        self.position
+pub fn group() -> Group {
+    Group::new()
+        .command("new", new)
+        .command("destroy", destroy)
+        .command("pos", set_position)
+        .command("gain", set_gain)
+}
+
+fn new(ctx: Context, source: String, gain: f32) -> String {
+    let id = String::from_utf8(
+        thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(8)
+            .collect::<Vec<u8>>(),
+    )
+    .unwrap()
+    .to_lowercase();
+    SOURCES.write().unwrap().insert(
+        id.clone(),
+        Mutex::new(SoundSource::new(ctx, id.clone(), source, gain)),
+    );
+    id
+}
+
+fn destroy(id: String) -> bool {
+    info!("`{}` has been told to die", id);
+    SOURCES
+        .write()
+        .unwrap()
+        .remove(&id)
+        .map_or(false, |source| {
+            info!("`{}` was playing `{}`", id, source.lock().unwrap().station);
+            true
+        })
+}
+
+pub fn set_position(id: String, x: f32, y: f32, z: f32) {
+    if let Some(src) = SOURCES.read().unwrap().get(&id) {
+        src.lock().unwrap().set_position([x, y, z]);
     }
-    pub const fn get_velocity(&self) -> Vector3 {
-        self.velocity
+}
+
+pub fn set_gain(id: String, gain: f32) {
+    if let Some(src) = SOURCES.read().unwrap().get(&id) {
+        src.lock().unwrap().set_gain(gain);
     }
 }

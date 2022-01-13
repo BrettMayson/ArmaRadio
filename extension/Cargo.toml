@@ -1,5 +1,20 @@
-[workspace]
-members = [
-    "core",
-    "cdylib",
-]
+[package]
+name = "live_radio"
+version = "0.4.1"
+authors = ["BrettMayson"]
+edition = "2018"
+
+[lib]
+name = "live_radio"
+crate-type = ["cdylib"]
+
+[dependencies]
+alto = "3.0"
+arma-rs = "1.4"
+lazy_static = "1.4"
+log = "0.4"
+reqwest = { version = "0.11", features = ["blocking"] }
+rust-embed = "6.3"
+simplemad = "0.9"
+regex = "1.5"
+rand = "0.8"
