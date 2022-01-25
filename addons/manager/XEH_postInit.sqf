@@ -3,14 +3,14 @@
 if (hasInterface) then {
 	[QGVAR(start), {
 		params ["_url", "_id", "_source"];
-		EXT callExtension ["create", [_url, _id, _source getVariable [QGVAR(volume), 1]]];
+		EXT callExtension ["source:new", [_url, _id, _source getVariable [QGVAR(volume), 1]]];
 		GVAR(sources) set [_id, _source];
 		[QGVAR(metadataUpdated), [_id, ""]] call CBA_fnc_localEvent;
 	}] call CBA_fnc_addEventHandler;
 
 	[QGVAR(stop), {
 		params ["_id"];
-		EXT callExtension ["destroy", [_id]];
+		EXT callExtension ["source:destroy", [_id]];
 		GVAR(sources) deleteAt _id;
 		GVAR(sourcesTitles) deleteAt _id;
 	}] call CBA_fnc_addEventHandler;

@@ -10,4 +10,4 @@ private _id = _sources select _index;
 
 _source setVariable [QGVAR(volume), _gain, true];
 
-EXT callExtension ["gain", [_id, _gain]];
+EXT callExtension ["source:gain", [_id, _gain]];

@@ -1,3 +1,5 @@
+use std::sync::RwLock;
+
 use alto::{Alto, DeviceObject};
 use arma_rs::Group;
 
@@ -43,12 +45,18 @@ lazy_static::lazy_static! {
         };
         listener
     };
+    pub static ref GAIN_MULTIPLIER: RwLock<f32> = RwLock::new(0.5);
+}
+
+pub fn cleanup() {
+    // idk what to do here lol
 }
 
 pub fn group() -> Group {
     Group::new()
         // .command("pos", set_position)
         .command("dir", set_orientation)
+        .command("gain", set_gain)
 }
 
 // fn set_position(x: f32, y: f32, z: f32) {
@@ -59,4 +67,8 @@ fn set_orientation(dx: f32, dy: f32, dz: f32, ux: f32, uy: f32, uz: f32) {
     LISTENER
         .set_orientation(([dx, dy, dz], [ux, uy, uz]))
         .unwrap();
+}
+
+fn set_gain(gain: f32) {
+    *GAIN_MULTIPLIER.write().unwrap() = gain;
 }

@@ -7,7 +7,7 @@ if !(isNull(findDisplay 312)) then {
 	_d = getCameraViewDirection curatorCamera;
 };
 private _u = vectorUp _player;
-EXT callExtension ["orientation", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
+EXT callExtension ["listener:dir", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
 
 private _inZeus = !(isNull (findDisplay 312));
 
@@ -15,7 +15,7 @@ private _inZeus = !(isNull (findDisplay 312));
 	private _source = GVAR(sources) getOrDefault [_x, objNull];
 	if (alive _source) then {
 		private _pos = getPosASL _source;
-		private _data = [_x,0,0,0];
+		private _data = [_x, 0, 0, 0];
 		if (_inZeus || {!(_source isEqualTo vehicle _player)}) then {
 			private _ppos = eyePos _player;
 			// Zeus Camera
@@ -29,7 +29,7 @@ private _inZeus = !(isNull (findDisplay 312));
 				(_pos#2 - _ppos#2) toFixed 2
 			];
 		};
-		EXT callExtension ["pos", _data];
+		EXT callExtension ["source:pos", _data];
 	} else {
 		[QGVAR(stop), [_x]] call CBA_fnc_localEvent;
 	};

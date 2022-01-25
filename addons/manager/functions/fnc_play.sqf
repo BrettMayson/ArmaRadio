@@ -18,7 +18,7 @@ if (_url isEqualTo "") exitWith {
 	_source setVariable [QGVAR(active), nil, true];
 };
 
-private _id = EXT callExtension "id";
+private _id = EXT callExtension ["id", []];
 
 _source setVariable [QGVAR(active), [_id, _url], true];
 

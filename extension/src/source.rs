@@ -9,11 +9,14 @@ use std::{
 
 use alto::Source;
 use arma_rs::{Context, Group};
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use reqwest::blocking::Client;
 use simplemad::Decoder;
 
-use crate::{listener::LISTENER, station::Station, vector3::Vector3};
+use crate::{
+    listener::{GAIN_MULTIPLIER, LISTENER},
+    station::Station,
+    vector3::Vector3,
+};
 
 lazy_static::lazy_static! {
     static ref SOURCES: RwLock<HashMap<String, Mutex<SoundSource>>> = RwLock::new(HashMap::new());
@@ -177,6 +180,17 @@ impl SoundSource {
     }
 }
 
+pub fn cleanup() {
+    let mut sources = SOURCES.write().unwrap();
+    let keys = sources
+        .keys()
+        .map(|s| s.to_owned())
+        .collect::<Vec<String>>();
+    for key in keys {
+        sources.remove(&key);
+    }
+}
+
 pub fn group() -> Group {
     Group::new()
         .command("new", new)
@@ -185,15 +199,7 @@ pub fn group() -> Group {
         .command("gain", set_gain)
 }
 
-fn new(ctx: Context, source: String, gain: f32) -> String {
-    let id = String::from_utf8(
-        thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(8)
-            .collect::<Vec<u8>>(),
-    )
-    .unwrap()
-    .to_lowercase();
+fn new(ctx: Context, id: String, source: String, gain: f32) -> String {
     SOURCES.write().unwrap().insert(
         id.clone(),
         Mutex::new(SoundSource::new(ctx, id.clone(), source, gain)),
@@ -221,6 +227,8 @@ pub fn set_position(id: String, x: f32, y: f32, z: f32) {
 
 pub fn set_gain(id: String, gain: f32) {
     if let Some(src) = SOURCES.read().unwrap().get(&id) {
-        src.lock().unwrap().set_gain(gain);
+        src.lock()
+            .unwrap()
+            .set_gain(gain * *GAIN_MULTIPLIER.read().unwrap());
     }
 }
