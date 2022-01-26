@@ -36,6 +36,8 @@ dependencies = [
 [[package]]
 name = "arma-rs"
 version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e0950862310ce37caf910a7cd4eb727473c362c0bc8123ea88d008981798a08"
 dependencies = [
  "arma-rs-proc",
  "crossbeam-queue",
@@ -49,6 +51,8 @@ dependencies = [
 [[package]]
 name = "arma-rs-proc"
 version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b91a63141d370fc955d8a974515f11648a559b366e149a5df2d4a17d52c7240"
 dependencies = [
  "proc-macro2",
  "quote",
