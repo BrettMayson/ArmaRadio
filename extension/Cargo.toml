@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 alto = "3.0"
-arma-rs = { path = "P:\\arma\\arma-rs\\arma-rs" }
+arma-rs = "1.5.0"
 lazy_static = "1.4"
 log = "0.4"
 rand = "0.8"
