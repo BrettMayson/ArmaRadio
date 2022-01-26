@@ -22,7 +22,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           target: ${{ matrix.arrays.os.target }}
-          toolchain: stable
+          toolchain: stable-${{ matrix.arrays.os.target }}
       - name: Cargo Build
         run: cargo +stable-${{ matrix.arrays.os.target }} build --release --target=${{ matrix.arrays.os.target }}
       - name: Upload
