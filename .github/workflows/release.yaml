@@ -10,8 +10,8 @@ jobs:
     strategy:
       matrix:
         arrays: [
-          os: { tag: "windows-latest", lib: "live_radio.dll", target: "i686-pc-windows-msvc" },
-          os: { tag: "windows-latest", lib: "live_radio.dll", target: "x86_64-pc-windows-msvc" },
+          os: { tag: "windows-latest", target: "i686-pc-windows-msvc" },
+          os: { tag: "windows-latest", target: "x86_64-pc-windows-msvc" },
         ]
     runs-on: ${{ matrix.arrays.os.tag }}
     steps:
@@ -23,12 +23,12 @@ jobs:
           target: ${{ matrix.arrays.os.target }}
           toolchain: stable
       - name: Cargo Build
-        run: cd extension && cargo build --release --target ${{ matrix.arrays.os.target }}
+        run: cd extension && cargo +stable-${{ matrix.arrays.os.target }} build --release
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.arrays.os.target }}
-          path: extension/target/${{ matrix.arrays.os.target }}/release/${{ matrix.arrays.os.lib }}
+          path: target/release/live_radio.dll
           if-no-files-found: error
           retention-days: 30
   package:
