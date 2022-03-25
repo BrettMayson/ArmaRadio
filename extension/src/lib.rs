@@ -38,6 +38,7 @@ pub fn init() -> Extension {
         let dur = SystemTime::now()
             .duration_since(*TIMESTAMP.read().unwrap())
             .unwrap();
+
         if dur > Duration::from_secs(3) {
             source::cleanup();
             listener::cleanup();

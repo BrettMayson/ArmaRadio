@@ -1,3 +1,3 @@
 #include "script_component.hpp"
 
-EXT callExtension "heartbeat";
+EXT callExtension ["heartbeat", []];

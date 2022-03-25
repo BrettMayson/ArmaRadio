@@ -80,9 +80,12 @@ mod tests {
     fn radio1() {
         let ext = init().testing();
         unsafe {
-            let (id, code) = ext.call(
+            let (id, code) = ext.call("id", Some(Vec::new()));
+            assert_eq!(code, 0);
+            let (_, code) = ext.call(
                 "source:new",
                 Some(vec![
+                    id.clone(),
                     "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one".to_string(),
                     "1.0".to_string(),
                 ]),

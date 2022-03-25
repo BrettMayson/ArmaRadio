@@ -182,10 +182,7 @@ impl SoundSource {
 
 pub fn cleanup() {
     let mut sources = SOURCES.write().unwrap();
-    let keys = sources
-        .keys()
-        .map(|s| s.to_owned())
-        .collect::<Vec<String>>();
+    let keys = sources.keys().cloned().collect::<Vec<String>>();
     for key in keys {
         sources.remove(&key);
     }
