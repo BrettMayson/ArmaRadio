@@ -22,8 +22,9 @@ jobs:
         with:
           target: ${{ matrix.arrays.os.target }}
           toolchain: stable
+          default: true
       - name: Cargo Build
-        run: cd extension && cargo +stable-${{ matrix.arrays.os.target }} build --release
+        run: cd extension && cargo build --release
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
