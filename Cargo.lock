@@ -501,7 +501,7 @@ checksum = "2c7721e472624c9aaad27a5eb6b7c9c6045c7a396f2efb6dabaec1b640d5e89b"
 
 [[package]]
 name = "live_radio"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "alto",
  "arma-rs",
