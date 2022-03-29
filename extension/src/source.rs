@@ -135,6 +135,10 @@ impl SoundSource {
         let dif = self.time.duration_since(old).unwrap();
         let elapsed: f32 = (dif.as_secs() as f32) + (dif.subsec_nanos() as f32 / 1_000_000_000.0);
 
+        if elapsed == 0.0 {
+            return;
+        }
+
         self.velocity = Vector3::new(
             (position[0] - self.position.x) / elapsed,
             (position[1] - self.position.y) / elapsed,
