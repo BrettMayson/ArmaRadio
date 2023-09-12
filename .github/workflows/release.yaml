@@ -9,10 +9,11 @@ jobs:
   build_extension:
     strategy:
       matrix:
-        arrays: [
-          os: { tag: "windows-latest", target: "i686-pc-windows-msvc" },
-          os: { tag: "windows-latest", target: "x86_64-pc-windows-msvc" },
-        ]
+        arrays:
+          [
+            os: { tag: "windows-latest", target: "i686-pc-windows-msvc" },
+            os: { tag: "windows-latest", target: "x86_64-pc-windows-msvc" },
+          ]
     runs-on: ${{ matrix.arrays.os.tag }}
     steps:
       - name: Checkout Repo
@@ -37,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      
+
       - uses: actions/download-artifact@v2
         with:
           name: x86_64-pc-windows-msvc
@@ -46,29 +47,28 @@ jobs:
         with:
           name: i686-pc-windows-msvc
 
-      - name: Set VERSION env
-        run: echo VERSION=${GITHUB_REF:11} >> $GITHUB_ENV
-      - name: Build addon with HEMTT
-        uses: arma-actions/hemtt@master
-        with:
-          command: 'build --release'
+      - name: Setup HEMTT
+        uses: arma-actions/hemtt
+      - name: Build
+        run: hemtt release
       - uses: actions/upload-artifact@v2
         with:
-          name: armapmc.zip
-          path: 'releases/live_radio.zip'
+          name: live_radio.zip
+          path: "releases/live_radio-latest.zip"
       # Upload to GitHub
       - uses: softprops/action-gh-release@v1
+        id: gh_release
         with:
-          files: 'releases/live_radio.zip'
+          files: "releases/live_radio-latest.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Upload to Steam Workshop
-      - run: unzip releases/live_radio.zip -d ./unzipped
+      - run: unzip releases/live_radio-latest.zip -d ./unzipped
       - uses: arma-actions/workshop-upload@v1
         with:
-          itemId: '2172022102' # Id of item to update
-          contentPath: 'unzipped/@live_radio'
-          changelog: 'https://github.com/BrettMayson/ArmaRadio/releases/tag/v${{ env.VERSION }}'
+          itemId: "2172022102" # Id of item to update
+          contentPath: "unzipped/@live_radio"
+          changelog: #{{ steps.gh_release.outputs.url }}
         env:
           STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
           STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}

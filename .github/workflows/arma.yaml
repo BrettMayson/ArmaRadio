@@ -46,14 +46,11 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: i686-pc-windows-msvc
-
-      - name: Set VERSION env
-        run: echo VERSION=${GITHUB_REF:11} >> $GITHUB_ENV
-      - name: Build addon with HEMTT
-        uses: arma-actions/hemtt@master
-        with:
-          command: 'build --release'
+      - name: Setup HEMTT
+        uses: arma-actions/hemtt
+      - name: Build
+        run: hemtt release
       - uses: actions/upload-artifact@v2
         with:
           name: live_radio.zip
-          path: 'releases/live_radio.zip'
+          path: 'releases/live_radio-latest.zip'
