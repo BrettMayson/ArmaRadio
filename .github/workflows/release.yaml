@@ -48,7 +48,7 @@ jobs:
           name: i686-pc-windows-msvc
 
       - name: Setup HEMTT
-        uses: arma-actions/hemtt@main
+        uses: arma-actions/hemtt@v1
       - name: Build
         run: hemtt release
       - uses: actions/upload-artifact@v2
