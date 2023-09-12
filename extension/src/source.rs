@@ -10,6 +10,7 @@ use std::{
 
 use alto::Source;
 use arma_rs::{Context, Group, ContextState};
+use crossbeam_channel::TryRecvError;
 
 use crate::{
     listener::Listener,
@@ -66,43 +67,42 @@ impl SoundSource {
                 .expect("Error setting soft spatialization");
             source.set_gain(gain * ctx.group().get::<AtomicU8>().map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed)).unwrap_or(255) as f32 / 255.0).expect("Error setting gain");
             let mut specific_gain = gain;
-            loop {
-                match stream.receiver.recv() {
-                    Ok(recv) => {
-                        if let Ok(command) = rx.try_recv() {
-                            match command {
-                                #[allow(unused_variables)]
-                                SoundCommand::SetPos(pos, vel) => {
-                                    println!("Setting position to {:?}", pos);
-                                    if source.set_position([pos.x, pos.y, pos.z]).is_err() {
-                                        println!("Error setting position");
-                                    }
-                                    if cfg!(not(test))
-                                        && source.set_velocity([vel.x, vel.y, vel.z]).is_err()
-                                    {
-                                        println!("Error setting velocity");
-                                    }
-                                }
-                                SoundCommand::SetGain(gain) => {
-                                    println!("Setting gain to {}", gain);
-                                    specific_gain = gain;
-                                    if source.set_gain(gain * ctx.group().get::<AtomicU8>().map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed)).unwrap_or(255) as f32 / 255.0).is_err() {
-                                        println!("Error setting gain");
-                                    }
-                                }
-                                SoundCommand::RefreshGain => {
-                                    println!("Refreshing gain");
-                                    if source.set_gain(specific_gain * ctx.group().get::<AtomicU8>().map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed)).unwrap_or(255) as f32 / 255.0).is_err() {
-                                        println!("Error setting gain");
-                                    }
-                                }
-                                SoundCommand::Destroy => {
-                                    println!("Source `{}` has been told to destroy", id);
-                                    source.stop();
-                                    break;
-                                }
+            'outer: loop {
+                while let Ok(command) = rx.try_recv() {
+                    match command {
+                        #[allow(unused_variables)]
+                        SoundCommand::SetPos(pos, vel) => {
+                            if source.set_position([pos.x, pos.y, pos.z]).is_err() {
+                                println!("Error setting position");
+                            }
+                            if cfg!(not(test))
+                                && source.set_velocity([vel.x, vel.y, vel.z]).is_err()
+                            {
+                                println!("Error setting velocity");
                             }
                         }
+                        SoundCommand::SetGain(gain) => {
+                            println!("Setting gain to {}", gain);
+                            specific_gain = gain;
+                            if source.set_gain(gain * ctx.group().get::<AtomicU8>().map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed)).unwrap_or(255) as f32 / 255.0).is_err() {
+                                println!("Error setting gain");
+                            }
+                        }
+                        SoundCommand::RefreshGain => {
+                            println!("Refreshing gain");
+                            if source.set_gain(specific_gain * ctx.group().get::<AtomicU8>().map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed)).unwrap_or(255) as f32 / 255.0).is_err() {
+                                println!("Error setting gain");
+                            }
+                        }
+                        SoundCommand::Destroy => {
+                            println!("Source `{}` has been told to destroy", id);
+                            source.stop();
+                            break 'outer;
+                        }
+                    }
+                }
+                match stream.receiver.try_recv() {
+                    Ok(recv) => {
                         match recv {
                             StreamPacket::Data(samples, freq) => {
                                 if freq != 44100 {
@@ -134,7 +134,7 @@ impl SoundSource {
                                 };
                                 source.queue_buffer(buffer).expect("Error queueing buffer");
                                 if source.state() != alto::SourceState::Playing
-                                    && source.buffers_queued() > 100
+                                    && source.buffers_queued() > 75
                                 {
                                     println!("Playing source, {:?}", source.state());
                                     source.play();
@@ -164,8 +164,9 @@ impl SoundSource {
                             }
                         }
                     }
-                    Err(e) => {
-                        println!("Error receiving stream packet: {}", e);
+                    Err(TryRecvError::Empty) => {},
+                    Err(TryRecvError::Disconnected) => {
+                        println!("Stream receiver disconnected");
                         break;
                     }
                 }

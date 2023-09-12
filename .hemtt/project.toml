@@ -1,0 +1,31 @@
+name = "Live Radio"
+prefix = "live_radio"
+author = "Brett"
+mainprefix = "z"
+
+[files]
+include = [
+    "live_radio.dll",
+    "live_radio_x64.dll"
+]
+
+[hemtt.launch]
+workshop = [
+    "450814997", # CBA
+    "463939057", # ACE
+]
+
+# postbuild = ["!extension"]
+# releasebuild = ["@zip {{modname}}", "@zip {{key_name}}"]
+
+# [scripts.extension]
+# show_output = true
+# steps_windows = [
+#     "rustup target add i686-pc-windows-msvc",
+#     "cd extension && cargo build --release && cargo +stable-i686-pc-windows-msvc build --release --target=i686-pc-windows-msvc",
+#     "copy target\\release\\live_radio.dll live_radio_x64.dll",
+#     "copy target\\i686-pc-windows-msvc\\release\\live_radio.dll live_radio.dll",
+# ]
+# steps_linux = [
+#     "echo \"Unable to build extension on Linux\""
+# ]

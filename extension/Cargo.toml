@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 alto = "3.0.4"
-arma-rs = "1.10.4"
+arma-rs = "1.10.5"
 crossbeam-channel = "0.5.8"
 log = "0.4.20"
 rand = "0.8.5"

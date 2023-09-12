@@ -3,21 +3,24 @@
 private _player = call CBA_fnc_currentUnit;
 private _inZeus = !(isNull (findDisplay 312));
 
-private _d = eyeDirection _player;
-if (_inZeus) then {
-    _d = getCameraViewDirection curatorCamera;
+
+private _data = if (_inZeus) then {
+    private _d = vectorDir curatorCamera;
+    _d append vectorUp curatorCamera;
+    _d
+} else {
+    private _d = eyeDirection _player;
+    _d append vectorUp _player;
+    _d
 };
-private _u = vectorUp _player;
-EXT callExtension ["listener:dir", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
+EXT callExtension ["listener:dir", _data];
 
 {
-    private _source = GVAR(sources) getOrDefault [_x, objNull];
-    if (alive _source) then {
-        private _pos = getPosASL _source;
+    if (alive _y) then {
+        private _pos = getPosASL _y;
         private _data = [_x, 0, 0, 0];
-        if (_inZeus || {!(_source isEqualTo vehicle _player)}) then {
+        if (_inZeus || {!(_y isEqualTo vehicle _player)}) then {
             private _ppos = eyePos _player;
-            // Zeus Camera
             if (_inZeus) then {
                 _ppos = getPosASL curatorCamera;
             };
@@ -32,4 +35,4 @@ EXT callExtension ["listener:dir", [_d#0, _d#1, _d#2, _u#0, _u#1, _u#2]];
     } else {
         [QGVAR(stop), [_x]] call CBA_fnc_localEvent;
     };
-} forEach keys GVAR(sources);
+} forEach GVAR(sources);
