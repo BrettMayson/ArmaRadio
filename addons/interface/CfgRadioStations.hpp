@@ -11,8 +11,4 @@ class CfgRadioStations {
         name = "Live Ireland";
         url = "http://192.111.140.11:8058/stream?type=http&nocache=325927";
     };
-    class VeniceClassic {
-        name = "Venice Classic Radio Italia";
-        url = "http://174.36.206.197:8000/stream?type=http&nocache=36567";
-    };
 };

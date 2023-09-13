@@ -10,4 +10,4 @@ private _id = _sources select _index;
 
 _source setVariable [QGVAR(volume), _gain, true];
 
-EXT callExtension ["source:gain", [_id, _gain]];
+[QGVAR(volume), [_id, _gain]] call CBA_fnc_globalEvent;

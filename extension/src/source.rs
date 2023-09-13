@@ -164,7 +164,9 @@ impl SoundSource {
                             }
                         }
                     }
-                    Err(TryRecvError::Empty) => {},
+                    Err(TryRecvError::Empty) => {
+                        std::thread::sleep(std::time::Duration::from_millis(8));
+                    }
                     Err(TryRecvError::Disconnected) => {
                         println!("Stream receiver disconnected");
                         break;

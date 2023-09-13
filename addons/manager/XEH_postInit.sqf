@@ -16,8 +16,8 @@ if (hasInterface) then {
     }] call CBA_fnc_addEventHandler;
 
     [QGVAR(volume), {
-        params ["_target", "_gain"];
-        [_target, _value] call FUNC(volume);
+        params ["_id", "_gain"];
+        EXT callExtension ["source:gain", [_id, _gain]];
     }] call CBA_fnc_addEventHandler;
 
     [FUNC(tick)] call CBA_fnc_addPerFrameHandler;
@@ -38,7 +38,6 @@ addMissionEventHandler ["ExtensionCallback", {
         LOG_SYS(_function,_data);
     };
     if !((tolower _name) isEqualTo "live_radio") exitWith {};
-    // systemChat format ["%1: %2", _function, _data];
     switch (_function) do {
         case "title": {
             (parseSimpleArray _data) params ["_id", "_title"];
