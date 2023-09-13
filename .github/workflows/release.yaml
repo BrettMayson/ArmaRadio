@@ -25,7 +25,7 @@ jobs:
           toolchain: stable
           default: true
       - name: Cargo Build
-        run: cd extension && cargo build --release
+        run: cargo build --release
       - name: Upload
         uses: actions/upload-artifact@v2
         with:

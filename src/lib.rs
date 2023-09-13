@@ -9,6 +9,9 @@ use std::{
 use arma_rs::{arma, Extension};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
+#[macro_use]
+extern crate log;
+
 mod audio;
 mod listener;
 mod logger;
@@ -31,9 +34,9 @@ pub fn init() -> Extension {
             return;
         }
         let earlier = Heartbeat::get();
-        let Ok(dur) = SystemTime::now()
-            .duration_since(*earlier.read().expect("not poisoned")) else {
-            println!("Error getting duration");
+        let Ok(dur) = SystemTime::now().duration_since(*earlier.read().expect("not poisoned"))
+        else {
+            error!("Error getting duration since last heartbeat");
             source::cleanup();
             continue;
         };

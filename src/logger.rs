@@ -22,6 +22,12 @@ impl log::Log for ArmaLogger {
             ) {
                 println!("Error logging: {}", e.to_string());
             }
+            println!(
+                "[{}] {} - {}",
+                record.level(),
+                record.target(),
+                record.args()
+            );
         }
     }
 
@@ -30,7 +36,7 @@ impl log::Log for ArmaLogger {
 
 pub fn init(context: Context) {
     let logger = Box::leak(Box::new(ArmaLogger { context }));
-    if let Err(e) = log::set_logger(logger).map(|()| log::set_max_level(LevelFilter::Info)) {
+    if let Err(e) = log::set_logger(logger).map(|()| log::set_max_level(LevelFilter::Debug)) {
         println!("failed to initialize logger: {}", e);
     }
 }

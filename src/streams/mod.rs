@@ -27,18 +27,21 @@ pub struct Stream {
 
 impl Stream {
     pub fn start(&self, url: &str) {
-        println!("Starting stream: {}", url);
+        debug!("Starting stream: {}", url);
         let count = self.count.clone();
         let url = url.to_string();
         let senders = self.senders.clone();
         std::thread::spawn(move || {
             let remote = RemoteStream::new(&url, senders.clone());
             let Ok(remote) = remote else {
-                println!("Failed to start stream: {}", remote.err().expect("error expected"));
+                error!(
+                    "Failed to start stream: {}",
+                    remote.err().expect("error expected")
+                );
                 return;
             };
             let Ok(decoder) = Decoder::decode(remote) else {
-                println!("Failed to start stream: {}", url);
+                error!("Failed to start stream: {}", url);
                 for sender in senders.0.read().expect("not poisoned").iter() {
                     let _ = sender.send(StreamPacket::Close);
                 }
@@ -46,7 +49,7 @@ impl Stream {
             };
             for decoding_result in decoder {
                 if count.load(std::sync::atomic::Ordering::Relaxed) == 0 {
-                    println!("no listeners, shutting down stream");
+                    debug!("no listeners, shutting down stream");
                     break;
                 }
                 match decoding_result {
@@ -66,7 +69,7 @@ impl Stream {
                                 samples.clone(),
                                 frame.sample_rate as i32,
                             )) {
-                                println!("Failed to send data: {}", e);
+                                error!("Failed to send data: {}", e);
                                 delete = true;
                             }
                         }
@@ -98,7 +101,6 @@ pub struct StreamListener {
 
 impl Drop for StreamListener {
     fn drop(&mut self) {
-        println!("stream listener dropped");
         self.count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
         Streams::get()
             .write()
@@ -135,7 +137,7 @@ impl Streams {
     pub fn listen(url: String) -> StreamListener {
         let (sender, receiver) = crossbeam_channel::unbounded();
         if let Some(stream) = Self::get().read().expect("not poisoned").get(&url) {
-            println!("using existing stream");
+            debug!("using existing stream for {}", url);
             if stream
                 .count
                 .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
@@ -149,7 +151,7 @@ impl Streams {
                 count: stream.count.clone(),
             };
         }
-        println!("creating new stream");
+        debug!("creating new stream for {}", url);
         let stream = Stream {
             count: Arc::new(AtomicU8::new(1)),
             senders: Senders(Arc::new(RwLock::new(vec![sender]))),
@@ -171,9 +173,8 @@ impl Streams {
 mod tests {
     #[test]
     fn it_works() {
-        let receiver = super::Streams::listen(
-            "http://pulseedm.cdnstream1.com:8124/1373_128".to_string(),
-        );
+        let receiver =
+            super::Streams::listen("http://pulseedm.cdnstream1.com:8124/1373_128".to_string());
         std::thread::sleep(std::time::Duration::from_secs(3));
         drop(receiver);
         std::thread::sleep(std::time::Duration::from_secs(3));

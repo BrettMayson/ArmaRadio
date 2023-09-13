@@ -1,3 +1,3 @@
 name = "Arma 3 Radio";
-dir = "@a3r";
+dir = "@live_radio";
 author = "BrettMayson";
