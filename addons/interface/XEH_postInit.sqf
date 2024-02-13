@@ -16,7 +16,7 @@ if (!isClass (configFile >> "CfgPatches" >> "ace_interaction")) then {
             [vehicle (call CBA_fnc_currentUnit)] call FUNC(open)
         },
         "", 1, true, true, "",
-        'vehicle (call CBA_fnc_currentUnit) isKindOf "Car"',
+        QUOTE(vehicle (call CBA_fnc_currentUnit) isKindOf ""Car"" && vehicle (call CBA_fnc_currentUnit) call FUNC(canOpen)),
         5
     ]] call CBA_fnc_addPlayerAction;
 };

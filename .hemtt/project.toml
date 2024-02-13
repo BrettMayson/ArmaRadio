@@ -15,6 +15,11 @@ workshop = [
     "463939057", # ACE
 ]
 
+[hemtt.launch.noace]
+workshop = [
+    "450814997", # CBA
+]
+
 # postbuild = ["!extension"]
 # releasebuild = ["@zip {{modname}}", "@zip {{key_name}}"]
 

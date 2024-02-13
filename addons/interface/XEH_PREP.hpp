@@ -1,3 +1,4 @@
+PREP(canOpen);
 PREP(handleListSelect);
 PREP(handlePower);
 PREP(handleSearchButton);

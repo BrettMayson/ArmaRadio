@@ -17,3 +17,12 @@ GVAR(stations) = [];
 } forEach [configFile, campaignConfigFile, missionConfigFile];
 
 GVAR(stations) sort true;
+
+[
+    QGVAR(driverAndCommanderOnly),
+    "CHECKBOX",
+    "Driver and Commander Only",
+    "Live Radio",
+    false,
+    1
+] call CBA_fnc_addSetting;
