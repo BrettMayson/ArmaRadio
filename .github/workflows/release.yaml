@@ -27,7 +27,7 @@ jobs:
       - name: Cargo Build
         run: cargo build --release
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arrays.os.target }}
           path: target/release/live_radio.dll
@@ -37,13 +37,13 @@ jobs:
     needs: build_extension
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: x86_64-pc-windows-msvc
       - run: mv live_radio.dll live_radio_x64.dll
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: i686-pc-windows-msvc
 
@@ -51,7 +51,7 @@ jobs:
         uses: arma-actions/hemtt@v1
       - name: Build
         run: hemtt release
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: live_radio.zip
           path: "releases/live_radio-latest.zip"
