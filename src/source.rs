@@ -252,13 +252,13 @@ impl SoundSource {
         }
     }
 
-    pub fn set_gain(&mut self, gain: f32) {
+    pub fn set_gain(&self, gain: f32) {
         if self.channel.send(SoundCommand::SetGain(gain)).is_err() {
             error!("error sending gain update");
         }
     }
 
-    pub fn refresh_gain(&mut self) {
+    pub fn refresh_gain(&self) {
         self.channel
             .send(SoundCommand::RefreshGain)
             .expect("not poisoned");

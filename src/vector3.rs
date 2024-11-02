@@ -12,7 +12,7 @@ impl Vector3 {
 
     /// Update the position and return the velocity
     pub fn update(&mut self, x: f32, y: f32, z: f32, delta_t: f32) -> Self {
-        let velocity = Vector3::new(
+        let velocity = Self::new(
             (x - self.x) / delta_t,
             (y - self.y) / delta_t,
             (z - self.z) / delta_t,
