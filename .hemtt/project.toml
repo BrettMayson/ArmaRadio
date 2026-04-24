@@ -3,13 +3,15 @@ prefix = "live_radio"
 author = "Brett"
 mainprefix = "z"
 
+[version]
+git_hash = 0
+
 [files]
 include = [
-    "live_radio.dll",
     "live_radio_x64.dll"
 ]
 
-[hemtt.launch]
+[hemtt.launch.default]
 workshop = [
     "450814997", # CBA
     "463939057", # ACE

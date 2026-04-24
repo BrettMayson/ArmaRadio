@@ -1,7 +1,6 @@
 use std::{
     collections::HashMap,
-    mem::MaybeUninit,
-    sync::{atomic::AtomicU8, Arc, RwLock},
+    sync::{atomic::AtomicU8, Arc, OnceLock, RwLock},
 };
 
 use crossbeam_channel::{Receiver, Sender};
@@ -121,17 +120,10 @@ pub struct Streams;
 
 impl Streams {
     pub fn get() -> Arc<RwLock<HashMap<String, Stream>>> {
-        static mut SINGLETON: MaybeUninit<Arc<RwLock<HashMap<String, Stream>>>> =
-            MaybeUninit::uninit();
-        static mut INIT: bool = false;
-
-        unsafe {
-            if !INIT {
-                SINGLETON.write(Arc::new(RwLock::new(HashMap::new())));
-                INIT = true;
-            }
-            SINGLETON.assume_init_ref().clone()
-        }
+        static SINGLETON: OnceLock<Arc<RwLock<HashMap<String, Stream>>>> = OnceLock::new();
+        SINGLETON
+            .get_or_init(|| Arc::new(RwLock::new(HashMap::new())))
+            .clone()
     }
 
     pub fn listen(url: String) -> StreamListener {

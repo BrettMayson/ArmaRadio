@@ -1,8 +1,7 @@
 #![deny(clippy::unwrap_used)]
 
 use std::{
-    mem::MaybeUninit,
-    sync::{Arc, RwLock},
+    sync::{Arc, OnceLock, RwLock},
     time::{Duration, SystemTime},
 };
 
@@ -69,17 +68,12 @@ pub struct Heartbeat;
 
 impl Heartbeat {
     pub fn get() -> Arc<RwLock<SystemTime>> {
-        static mut SINGLETON: MaybeUninit<Arc<RwLock<SystemTime>>> = MaybeUninit::uninit();
-        static mut INIT: bool = false;
-
-        unsafe {
-            if !INIT {
-                SINGLETON.write(Arc::new(RwLock::new(SystemTime::now())));
-                INIT = true;
-            }
-            SINGLETON.assume_init_ref().clone()
-        }
+        static SINGLETON: OnceLock<Arc<RwLock<SystemTime>>> = OnceLock::new();
+        SINGLETON
+            .get_or_init(|| Arc::new(RwLock::new(SystemTime::now())))
+            .clone()
     }
+
     pub fn beat() {
         *Self::get().write().expect("not poisoned") = SystemTime::now();
     }

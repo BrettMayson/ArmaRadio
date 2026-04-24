@@ -7,46 +7,33 @@ on:
 
 jobs:
   build_extension:
-    strategy:
-      matrix:
-        arrays:
-          [
-            os: { tag: "windows-latest", target: "i686-pc-windows-msvc" },
-            os: { tag: "windows-latest", target: "x86_64-pc-windows-msvc" },
-          ]
-    runs-on: ${{ matrix.arrays.os.tag }}
+    runs-on: windows-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Install latest
-        uses: actions-rs/toolchain@v1
+        uses: actions/checkout@v4
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          target: ${{ matrix.arrays.os.target }}
-          toolchain: stable
-          default: true
+          targets: x86_64-pc-windows-msvc
       - name: Cargo Build
-        run: cargo build --release
+        run: cargo build --release --target x86_64-pc-windows-msvc
+      - name: Rename DLL
+        run: mv target/x86_64-pc-windows-msvc/release/live_radio.dll live_radio_x64.dll
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.arrays.os.target }}
-          path: target/release/live_radio.dll
+          name: live_radio_x64
+          path: live_radio_x64.dll
           if-no-files-found: error
           retention-days: 30
   package:
     needs: build_extension
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: x86_64-pc-windows-msvc
-      - run: mv live_radio.dll live_radio_x64.dll
-      - uses: actions/download-artifact@v4
-        with:
-          name: i686-pc-windows-msvc
-
+          name: live_radio_x64
       - name: Setup HEMTT
         uses: arma-actions/hemtt@v1
       - name: Build
@@ -66,9 +53,9 @@ jobs:
       - run: unzip releases/live_radio-latest.zip -d ./unzipped
       - uses: arma-actions/workshop-upload@v1
         with:
-          itemId: "2172022102" # Id of item to update
+          itemId: "2172022102"
           contentPath: "unzipped/@live_radio"
-          changelog: #{{ steps.gh_release.outputs.url }}
+          changelog: ${{ steps.gh_release.outputs.url }}
         env:
           STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
           STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
