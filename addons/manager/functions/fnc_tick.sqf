@@ -19,7 +19,7 @@ EXT callExtension ["listener:dir", _data];
     if (alive _y) then {
         private _pos = getPosASL _y;
         private _data = [_x, 0, 0, 0];
-        if (_inZeus || {!(_y isEqualTo vehicle _player)}) then {
+        if (_inZeus || {_y isNotEqualTo vehicle _player}) then {
             private _ppos = eyePos _player;
             if (_inZeus) then {
                 _ppos = getPosASL curatorCamera;

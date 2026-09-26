@@ -6,8 +6,8 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use arma_rs::{arma, Extension};
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use arma_rs::{Extension, arma};
+use rand::{Rng, distributions::Alphanumeric, thread_rng};
 
 #[macro_use]
 extern crate log;
@@ -29,22 +29,24 @@ pub fn init() -> Extension {
         .finish();
     logger::init(ext.context());
 
-    std::thread::spawn(|| loop {
-        if cfg!(test) {
-            return;
-        }
-        let earlier = Heartbeat::get();
-        let Ok(dur) = SystemTime::now().duration_since(*earlier.read().expect("not poisoned"))
-        else {
-            error!("Error getting duration since last heartbeat");
-            source::cleanup();
-            continue;
-        };
+    std::thread::spawn(|| {
+        loop {
+            if cfg!(test) {
+                return;
+            }
+            let earlier = Heartbeat::get();
+            let Ok(dur) = SystemTime::now().duration_since(*earlier.read().expect("not poisoned"))
+            else {
+                error!("Error getting duration since last heartbeat");
+                source::cleanup();
+                continue;
+            };
 
-        if dur > Duration::from_secs(3) {
-            source::cleanup();
+            if dur > Duration::from_secs(3) {
+                source::cleanup();
+            }
+            std::thread::sleep(Duration::from_secs(1));
         }
-        std::thread::sleep(Duration::from_secs(1));
     });
 
     ext

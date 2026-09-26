@@ -2,9 +2,9 @@ use std::{
     collections::HashMap,
     mem::MaybeUninit,
     sync::{
+        Arc, Mutex, RwLock,
         atomic::AtomicU8,
         mpsc::{self, Receiver, Sender},
-        Arc, Mutex, RwLock,
     },
     time::SystemTime,
 };

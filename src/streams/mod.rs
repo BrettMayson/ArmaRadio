@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     mem::MaybeUninit,
-    sync::{atomic::AtomicU8, Arc, RwLock},
+    sync::{Arc, RwLock, atomic::AtomicU8},
 };
 
 use crossbeam_channel::{Receiver, Sender};

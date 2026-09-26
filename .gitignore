@@ -7,3 +7,5 @@ old/
 keys/
 target/
 .hemttout/
+*.biprivatekey
+*.hemttprivatekey

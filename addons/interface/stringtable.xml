@@ -3,12 +3,8 @@
     <Package name="Interface">
         <Key ID="STR_Live_Radio_Interface_DisplayName">
             <English>FM Radio</English>
-        </Key>
-        <Key ID="STR_Live_Radio_Interface_On">
-            <English>On</English>
-        </Key>
-        <Key ID="STR_Live_Radio_Interface_Off">
-            <English>Off</English>
+            <Spanish>Radio FM</Spanish>
+            <German>FM-Radio</German>
         </Key>
     </Package>
 </Project>

@@ -5,7 +5,7 @@ params ["_source", "_url"];
 private _ret = "";
 
 private _existing = _source getVariable [QGVAR(active), []];
-if !(_existing isEqualTo []) then {
+if (_existing isNotEqualTo []) then {
     if ((_existing select 1) isEqualTo _url) then {
         _ret = _existing select 0;
     } else {
@@ -13,7 +13,7 @@ if !(_existing isEqualTo []) then {
     };
 };
 
-if !(_ret isEqualTo "") exitWith {};
+if (_ret isNotEqualTo "") exitWith {};
 if (_url isEqualTo "") exitWith {
     _source setVariable [QGVAR(active), nil, true];
 };

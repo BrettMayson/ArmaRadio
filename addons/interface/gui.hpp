@@ -6,7 +6,6 @@ class ctrlStaticFrame;
 class ctrlStaticPictureKeepAspect;
 class ctrlEdit;
 class ctrlListbox;
-class ctrlProgress;
 class ctrlButtonOK;
 class ctrlButtonSearch;
 class ctrlButtonPictureKeepAspect;
