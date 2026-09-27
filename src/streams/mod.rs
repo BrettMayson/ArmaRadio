@@ -26,7 +26,7 @@ pub struct Stream {
 
 impl Stream {
     pub fn start(&self, url: &str) {
-        debug!("Starting stream: {}", url);
+        debug!("Starting stream: {url}");
         let count = self.count.clone();
         let url = url.to_string();
         let senders = self.senders.clone();
@@ -40,7 +40,7 @@ impl Stream {
                 return;
             };
             let Ok(decoder) = Decoder::decode(remote) else {
-                error!("Failed to start stream: {}", url);
+                error!("Failed to start stream: {url}");
                 for sender in senders.0.read().expect("not poisoned").iter() {
                     let _ = sender.send(StreamPacket::Close);
                 }
@@ -57,18 +57,19 @@ impl Stream {
                         let mut samples: Vec<alto::Mono<f32>> = Vec::new();
                         for i in 0..frame.samples[0].len() {
                             samples.push(alto::Mono {
-                                center: (frame.samples[0][i].to_f32()
-                                    + frame.samples[1][i].to_f32())
-                                    / 2.0_f32,
+                                center: f32::midpoint(
+                                    frame.samples[0][i].to_f32(),
+                                    frame.samples[1][i].to_f32(),
+                                ),
                             });
                         }
                         let mut delete = false;
                         for sender in senders.0.read().expect("not poisoned").iter() {
                             if let Err(e) = sender.send(StreamPacket::Data(
                                 samples.clone(),
-                                frame.sample_rate as i32,
+                                frame.sample_rate.cast_signed(),
                             )) {
-                                error!("Failed to send data: {}", e);
+                                error!("Failed to send data: {e}");
                                 delete = true;
                             }
                         }
@@ -129,7 +130,7 @@ impl Streams {
     pub fn listen(url: String) -> StreamListener {
         let (sender, receiver) = crossbeam_channel::unbounded();
         if let Some(stream) = Self::get().read().expect("not poisoned").get(&url) {
-            debug!("using existing stream for {}", url);
+            debug!("using existing stream for {url}");
             if stream
                 .count
                 .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
@@ -143,7 +144,7 @@ impl Streams {
                 count: stream.count.clone(),
             };
         }
-        debug!("creating new stream for {}", url);
+        debug!("creating new stream for {url}");
         let stream = Stream {
             count: Arc::new(AtomicU8::new(1)),
             senders: Senders(Arc::new(RwLock::new(vec![sender]))),

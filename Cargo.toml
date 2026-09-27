@@ -8,6 +8,19 @@ edition = "2024"
 name = "live_radio"
 crate-type = ["cdylib"]
 
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+too_many_lines = "allow"
+needless_pass_by_value = "allow"
+missing_panics_doc = "allow"
+
+[lints.rust]
+future_incompatible = "warn"
+nonstandard_style = "warn"
+
 [dependencies]
 alto = "3.0.4"
 arma-rs = "1.13.0"
