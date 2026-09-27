@@ -1,8 +1,7 @@
 use std::{
     collections::HashMap,
-    mem::MaybeUninit,
     sync::{
-        Arc, Mutex, RwLock,
+        Arc, Mutex, OnceLock, RwLock,
         atomic::AtomicU8,
         mpsc::{self, Receiver, Sender},
     },
@@ -25,16 +24,10 @@ type SourceMap = RwLock<HashMap<String, Mutex<SoundSource>>>;
 
 impl Sources {
     pub fn get() -> Arc<SourceMap> {
-        static mut SINGLETON: MaybeUninit<Arc<SourceMap>> = MaybeUninit::uninit();
-        static mut INIT: bool = false;
-
-        unsafe {
-            if !INIT {
-                SINGLETON.write(Arc::new(RwLock::new(HashMap::new())));
-                INIT = true;
-            }
-            SINGLETON.assume_init_ref().clone()
-        }
+        static SINGLETON: OnceLock<Arc<SourceMap>> = OnceLock::new();
+        SINGLETON
+            .get_or_init(|| Arc::new(RwLock::new(HashMap::new())))
+            .clone()
     }
 }
 

@@ -1,4 +1,4 @@
-use std::{mem::MaybeUninit, sync::Arc};
+use std::sync::{Arc, OnceLock};
 
 use alto::{Context, DeviceObject};
 use arma_rs::Group;
@@ -9,42 +9,39 @@ pub struct Listener;
 
 impl Listener {
     pub fn get() -> Option<Arc<Context>> {
-        static mut SINGLETON: MaybeUninit<Arc<Context>> = MaybeUninit::uninit();
-        static mut INIT: bool = false;
+        static SINGLETON: OnceLock<Arc<Context>> = OnceLock::new();
 
-        unsafe {
-            if !INIT {
-                SINGLETON.write(Arc::new({
-                    let listener = {
-                        let device = Audio::get()?.open(None).expect("can't open device");
-                        debug!("{:?}", device.specifier());
-                        device.new_context(None).expect("can't create context")
-                    };
-                    if listener.set_position([0.0, 0.0, 0.0]).is_err() {
-                        error!("Error setting position");
-                    };
-                    if listener.set_velocity([0.0, 0.0, 0.0]).is_err() {
-                        error!("Error setting velocity");
-                    }
-                    if listener
-                        .set_orientation(([0.0, 0.0, 1.0], [0.0, 1.0, 0.0]))
-                        .is_err()
-                    {
-                        error!("Error setting orientation");
-                    }
-                    if listener.set_meters_per_unit(1.0).is_err() {
-                        error!("Error setting meters per unit");
-                    }
-                    listener.set_distance_model(alto::DistanceModel::Exponent);
-                    if listener.set_doppler_factor(0.2).is_err() {
-                        error!("Error setting doppler factor");
-                    };
-                    listener
-                }));
-                INIT = true;
-            }
-            Some(SINGLETON.assume_init_ref().clone())
+        if let Some(listener) = SINGLETON.get() {
+            return Some(listener.clone());
         }
+
+        let listener = {
+            let device = Audio::get()?.open(None).expect("can't open device");
+            debug!("{:?}", device.specifier());
+            device.new_context(None).expect("can't create context")
+        };
+        if listener.set_position([0.0, 0.0, 0.0]).is_err() {
+            error!("Error setting position");
+        };
+        if listener.set_velocity([0.0, 0.0, 0.0]).is_err() {
+            error!("Error setting velocity");
+        }
+        if listener
+            .set_orientation(([0.0, 0.0, 1.0], [0.0, 1.0, 0.0]))
+            .is_err()
+        {
+            error!("Error setting orientation");
+        }
+        if listener.set_meters_per_unit(1.0).is_err() {
+            error!("Error setting meters per unit");
+        }
+        listener.set_distance_model(alto::DistanceModel::Exponent);
+        if listener.set_doppler_factor(0.2).is_err() {
+            error!("Error setting doppler factor");
+        };
+
+        let listener = Arc::new(listener);
+        Some(SINGLETON.get_or_init(|| listener).clone())
     }
 }
 
