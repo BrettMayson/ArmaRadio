@@ -9,6 +9,7 @@ class CfgRadioStations {
     };
     class LifeIreland {
         name = "Live Ireland";
+        picture = "https://www.liveradio.ie/files/images/184739/resized/180x172c/liveireland_radio.jpg";
         url = "http://192.111.140.11:8058/stream?type=http&nocache=325927";
         condition = "missionNamespace getVariable ['LiveIrelandAvailable', false]";
     };

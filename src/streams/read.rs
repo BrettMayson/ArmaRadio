@@ -59,7 +59,6 @@ impl Read for RemoteStream {
                 let mut metadata = vec![0u8; length];
                 self.response.read_exact(&mut metadata)?;
                 let metadata = String::from_utf8_lossy(&metadata);
-                println!("{}", metadata);
                 for cap in self.regex.captures_iter(&metadata) {
                     if self.last_track != Some(cap[1].to_string()) {
                         for sender in self.senders.0.read().expect("not poisoned").iter() {

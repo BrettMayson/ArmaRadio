@@ -5,6 +5,7 @@ ADDON = true;
 
 GVAR(sources) = createHashMap;
 GVAR(sourcesTitles) = createHashMap;
+GVAR(sourcesAlbumArt) = createHashMap;
 
 // Make sure the extension has been loaded once
 EXT callExtension "";

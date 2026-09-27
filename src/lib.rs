@@ -29,6 +29,12 @@ pub fn init() -> Extension {
         .finish();
     logger::init(ext.context());
 
+    let tmp_dir = dirs::cache_dir().expect("Failed to get cache dir").join("live_radio");
+    if tmp_dir.exists() {
+        std::fs::remove_dir_all(&tmp_dir).expect("Failed to delete cache directory");
+    }
+    std::fs::create_dir_all(&tmp_dir).expect("Failed to create cache directory");
+
     std::thread::spawn(|| {
         loop {
             if cfg!(test) {
