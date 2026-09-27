@@ -95,6 +95,7 @@ class GVAR(display) {
         class Description: ctrlStatic {
             idc = IDC_DESCRIPTION;
             style = ST_CENTER + ST_MULTI + ST_NO_RECT;
+            tooltip = CSTRING(CopyToClipboard);
             x = QUOTE(CENTER_X + GRID_W(140/2 - 59));
             y = QUOTE(CENTER_Y - GRID_H(110/2 - 70));
             w = QUOTE(GRID_W(58));

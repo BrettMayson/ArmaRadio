@@ -56,3 +56,7 @@ _ctrlVolumeBarMouse ctrlAddEventHandler ["MouseButtonDown", {call FUNC(handleVol
 
 private _volume = _object getVariable [QEGVAR(manager,volume), DEFAULT_VOLUME];
 [_display, _volume] call FUNC(handleVolume);
+
+// Initialize the track title, click to copy to clipboard
+private _ctrlDescription = _display displayCtrl IDC_DESCRIPTION;
+_ctrlDescription ctrlAddEventHandler ["MouseButtonClick", {call FUNC(handleDescriptionClick)}];

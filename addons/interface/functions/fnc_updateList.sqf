@@ -35,16 +35,23 @@ lbClear _ctrlList;
 _ctrlList lbSetCurSel -1;
 
 {
-    _x params ["_name", "_picture", "_url", "_condition"];
+    _x params ["_name", "_picture", "_url", "_condition", "_noCopyright"];
 
     if (call _condition isEqualTo false) then { continue };
+    if (GVAR(copyrightFreeOnly) && {!_noCopyright}) then { continue };
 
     private _isActive = _url isEqualTo _activeURL;
 
+    private _displayName = if (_noCopyright && !GVAR(copyrightFreeOnly)) then {
+        format [localize LSTRING(CopyrightFreeTag), _name]
+    } else {
+        _name
+    };
+
     // Add currently playing station regardless of filter
     if (_isActive || {_filter in toLower _name}) then {
-        private _index = _ctrlList lbAdd _name;
-        _ctrlList setVariable [str _index, [_name, _picture, _url]];
+        private _index = _ctrlList lbAdd _displayName;
+        _ctrlList setVariable [str _index, [_displayName, _picture, _url]];
 
         if (_isActive) then {
             _ctrlList lbSetCurSel _index;

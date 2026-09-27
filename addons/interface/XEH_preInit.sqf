@@ -10,7 +10,13 @@ GVAR(stations) = [];
 
 {
     private _stations = configProperties [_x >> "CfgRadioStations", "isClass _x"] apply {
-        [getText (_x >> "name"), getText (_x >> "picture"), getText (_x >> "url"), compile getText (_x >> "condition")]
+        [
+            getText (_x >> "name"),
+            getText (_x >> "picture"),
+            getText (_x >> "url"),
+            compile getText (_x >> "condition"),
+            getNumber (_x >> "noCopyright") == 1
+        ]
     };
 
     GVAR(stations) append _stations;
@@ -31,6 +37,15 @@ GVAR(stations) sort true;
     QGVAR(interactOutsideVehicle),
     "CHECKBOX",
     LSTRING(InteractOutsideVehicle),
+    "Live Radio",
+    false,
+    1
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(copyrightFreeOnly),
+    "CHECKBOX",
+    LSTRING(CopyrightFreeOnly),
     "Live Radio",
     false,
     1
