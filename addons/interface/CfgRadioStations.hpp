@@ -10,5 +10,6 @@ class CfgRadioStations {
     class LifeIreland {
         name = "Live Ireland";
         url = "http://192.111.140.11:8058/stream?type=http&nocache=325927";
+        condition = "missionNamespace getVariable ['LiveIrelandAvailable', false]";
     };
 };

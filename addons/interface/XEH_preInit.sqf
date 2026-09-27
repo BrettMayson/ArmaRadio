@@ -10,7 +10,7 @@ GVAR(stations) = [];
 
 {
     private _stations = configProperties [_x >> "CfgRadioStations", "isClass _x"] apply {
-        [getText (_x >> "name"), getText (_x >> "picture"), getText (_x >> "url")]
+        [getText (_x >> "name"), getText (_x >> "picture"), getText (_x >> "url"), compile getText (_x >> "condition")]
     };
 
     GVAR(stations) append _stations;

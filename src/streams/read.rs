@@ -3,6 +3,8 @@ use std::io::{BufReader, Read};
 use regex::Regex;
 use reqwest::blocking::{Client, Response};
 
+use crate::album::search_album;
+
 use super::{Senders, StreamPacket};
 
 pub struct RemoteStream {
@@ -11,6 +13,7 @@ pub struct RemoteStream {
     interval: Option<usize>,
     regex: Regex,
     senders: Senders,
+    last_track: Option<String>,
 }
 
 impl RemoteStream {
@@ -30,6 +33,7 @@ impl RemoteStream {
             counter: 0,
             regex: Regex::new("(?m)StreamTitle='(.+?)';").map_err(|e| e.to_string())?,
             senders,
+            last_track: None,
         })
     }
 }
@@ -55,9 +59,22 @@ impl Read for RemoteStream {
                 let mut metadata = vec![0u8; length];
                 self.response.read_exact(&mut metadata)?;
                 let metadata = String::from_utf8_lossy(&metadata);
+                println!("{}", metadata);
                 for cap in self.regex.captures_iter(&metadata) {
-                    for sender in self.senders.0.read().expect("not poisoned").iter() {
-                        let _ = sender.send(StreamPacket::Title(cap[1].to_string()));
+                    if self.last_track != Some(cap[1].to_string()) {
+                        for sender in self.senders.0.read().expect("not poisoned").iter() {
+                            let _ = sender.send(StreamPacket::Title(cap[1].to_string()));
+                        }
+                        self.last_track = Some(cap[1].to_string());
+                        let track = cap[1].to_string();
+                        let senders = self.senders.clone();
+                        std::thread::spawn(move || {
+                            if let Some(path) = search_album(&track) {
+                                for sender in senders.0.read().expect("not poisoned").iter() {
+                                    let _ = sender.send(StreamPacket::AlbumArt(path.clone()));
+                                }
+                            }
+                        });
                     }
                 }
                 self.counter = 0;

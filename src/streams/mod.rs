@@ -89,6 +89,7 @@ impl Stream {
 
 pub enum StreamPacket {
     Data(Vec<alto::Mono<f32>>, i32),
+    AlbumArt(String),
     Title(String),
     Close,
     Check,
@@ -165,9 +166,18 @@ impl Streams {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
+    fn pulse_edm() {
         let receiver =
             super::Streams::listen("http://pulseedm.cdnstream1.com:8124/1373_128".to_string());
+        std::thread::sleep(std::time::Duration::from_secs(3));
+        drop(receiver);
+        std::thread::sleep(std::time::Duration::from_secs(3));
+    }
+
+    #[test]
+    fn classic_rock() {
+        let receiver =
+            super::Streams::listen("http://listen.classicrock109.com:10042".to_string());
         std::thread::sleep(std::time::Duration::from_secs(3));
         drop(receiver);
         std::thread::sleep(std::time::Duration::from_secs(3));

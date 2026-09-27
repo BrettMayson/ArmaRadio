@@ -17,6 +17,7 @@ mod logger;
 mod source;
 mod streams;
 mod vector3;
+pub mod album;
 
 #[arma]
 pub fn init() -> Extension {

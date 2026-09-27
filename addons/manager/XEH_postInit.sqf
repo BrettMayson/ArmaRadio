@@ -3,7 +3,11 @@
 if (hasInterface) then {
     [QGVAR(start), {
         params ["_id", "_url", "_source"];
-        EXT callExtension ["source:new", [_id, _url, _source getVariable [QGVAR(volume), 1]]];
+        private _gain = _source getVariable [QGVAR(volume), 1];
+        if (missionNamespace getVariable [QGVAR(streamerMode), false] && {!([_url] call FUNC(isCopyrightSafe))}) then {
+            _gain = 0;
+        };
+        EXT callExtension ["source:new", [_id, _url, _gain]];
         GVAR(sources) set [_id, _source];
         [QGVAR(metadataUpdated), [_id, ""]] call CBA_fnc_localEvent;
     }] call CBA_fnc_addEventHandler;
@@ -13,10 +17,16 @@ if (hasInterface) then {
         EXT callExtension ["source:destroy", [_id]];
         GVAR(sources) deleteAt _id;
         GVAR(sourcesTitles) deleteAt _id;
+        GVAR(sourcesAlbumArt) deleteAt _id;
     }] call CBA_fnc_addEventHandler;
 
     [QGVAR(volume), {
         params ["_id", "_gain"];
+        private _source = GVAR(sources) getOrDefault [_id, objNull];
+        private _url = _source getVariable [QGVAR(active), []] param [1, ""];
+        if (missionNamespace getVariable [QGVAR(streamerMode), false] && {!([_url] call FUNC(isCopyrightSafe))}) then {
+            _gain = 0;
+        };
         EXT callExtension ["source:gain", [_id, _gain]];
     }] call CBA_fnc_addEventHandler;
 
@@ -44,6 +54,11 @@ addMissionEventHandler ["ExtensionCallback", {
             (parseSimpleArray _data) params ["_id", "_title"];
             GVAR(sourcesTitles) set [_id, _title];
             [QGVAR(metadataUpdated), [_id, _title]] call CBA_fnc_localEvent;
+        };
+        case "album_art": {
+            (parseSimpleArray _data) params ["_id", "_path"];
+            GVAR(sourcesAlbumArt) set [_id, _path];
+            [QGVAR(albumArtUpdated), [_id, _path]] call CBA_fnc_localEvent;
         };
     };
 }];

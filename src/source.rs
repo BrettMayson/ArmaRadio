@@ -182,6 +182,19 @@ impl SoundSource {
                                     break;
                                 }
                             }
+                            StreamPacket::AlbumArt(path) => {
+                                if ctx
+                                    .callback_data(
+                                        "live_radio",
+                                        "album_art",
+                                        Some(vec![id.clone(), path]),
+                                    )
+                                    .is_err()
+                                {
+                                    // arma is probably closed
+                                    break;
+                                }
+                            }
                             StreamPacket::Close => {
                                 debug!("Stream closed for {id}");
                                 source.stop();

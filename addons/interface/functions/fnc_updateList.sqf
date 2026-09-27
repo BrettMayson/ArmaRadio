@@ -35,7 +35,9 @@ lbClear _ctrlList;
 _ctrlList lbSetCurSel -1;
 
 {
-    _x params ["_name", "_picture", "_url"];
+    _x params ["_name", "_picture", "_url", "_condition"];
+
+    if (call _condition isEqualTo false) then { continue };
 
     private _isActive = _url isEqualTo _activeURL;
 

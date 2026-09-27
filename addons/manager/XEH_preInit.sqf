@@ -9,6 +9,14 @@ GVAR(sourcesTitles) = createHashMap;
 // Make sure the extension has been loaded once
 EXT callExtension "";
 
+GVAR(copyrightSafe) = createHashMap;
+{
+    private _configSource = _x;
+    {
+        GVAR(copyrightSafe) set [getText (_x >> "url"), getNumber (_x >> "noCopyright") == 1];
+    } forEach (configProperties [_configSource >> "CfgRadioStations", "isClass _x"]);
+} forEach [configFile, campaignConfigFile, missionConfigFile];
+
 [
     QGVAR(volumeMultiplier),
     "SLIDER",
@@ -18,5 +26,17 @@ EXT callExtension "";
     0,
     {
         EXT callExtension ["source:global_gain", [_this]];
+    }
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(streamerMode),
+    "CHECKBOX",
+    "Streamer Mode",
+    "Live Radio",
+    false,
+    0,
+    {
+        call FUNC(refreshStreamerMode);
     }
 ] call CBA_fnc_addSetting;

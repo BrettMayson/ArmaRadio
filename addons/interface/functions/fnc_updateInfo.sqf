@@ -29,8 +29,9 @@ private _ctrlDescription = _display displayCtrl IDC_DESCRIPTION;
 private _activeID = _object getVariable [QEGVAR(manager,active), []] param [0, ""];
 _ctrlDescription ctrlSetText (EGVAR(manager,sourcesTitles) getOrDefault [_activeID, ""]);
 
+private _activePicture = EGVAR(manager,sourcesAlbumArt) getOrDefault [_activeID, _picture];
 private _ctrlPicture = _display displayCtrl IDC_PICTURE;
-_ctrlPicture ctrlSetText _picture;
+_ctrlPicture ctrlSetText _activePicture;
 
 private _ctrlPictureDefault = _display displayCtrl IDC_PICTURE_DEFAULT;
-_ctrlPictureDefault ctrlShow (_picture == "");
+_ctrlPictureDefault ctrlShow (_activePicture == "");
