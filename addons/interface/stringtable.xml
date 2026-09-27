@@ -6,5 +6,15 @@
             <Spanish>Radio FM</Spanish>
             <German>FM-Radio</German>
         </Key>
+        <Key ID="STR_Live_Radio_Interface_DriverCommanderOnly">
+            <English>Driver and Commander Only</English>
+            <Spanish>Solo conductor y comandante</Spanish>
+            <German>Nur Fahrer und Kommandant</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_InteractOutsideVehicle">
+            <English>Interact Outside Vehicle</English>
+            <Spanish>Interactuar fuera del vehículo</Spanish>
+            <German>Außerhalb des Fahrzeugs interagieren</German>
+        </Key>
     </Package>
 </Project>

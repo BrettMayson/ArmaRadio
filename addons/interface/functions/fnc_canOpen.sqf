@@ -5,6 +5,7 @@
  *
  * Arguments:
  * 0: Object <OBJECT>
+ * 1: Outside <BOOLEAN>
  *
  * Return Value:
  * BOOLEAN
@@ -15,11 +16,20 @@
  * Public: No
  */
 
-if !(missionNamespace getVariable [QGVAR(driverAndCommanderOnly), false]) exitWith {true};
+params ["_object", "_outside"];
 
-params ["_object"];
-private _player = call CBA_fnc_currentUnit;
+if (!_outside) then {
+    if (GVAR(driverAndCommanderOnly)) exitWith {
+        private _player = call CBA_fnc_currentUnit;
 
-if (driver _object == _player) exitWith {true};
-if (commander _object == _player) exitWith {true};
-false
+        (driver _object == _player) ||
+        (commander _object == _player)
+    };
+
+    true
+} else {
+    if (!GVAR(interactOutsideVehicle)) exitWith {false};
+    if (!isNull driver _object) exitWith {false};
+
+    true
+};

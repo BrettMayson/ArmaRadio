@@ -21,7 +21,16 @@ GVAR(stations) sort true;
 [
     QGVAR(driverAndCommanderOnly),
     "CHECKBOX",
-    "Driver and Commander Only",
+    LSTRING(DriverCommanderOnly),
+    "Live Radio",
+    false,
+    1
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(interactOutsideVehicle),
+    "CHECKBOX",
+    LSTRING(InteractOutsideVehicle),
     "Live Radio",
     false,
     1

@@ -5,7 +5,16 @@ class CfgVehicles {
             class GVAR(open) {
                 displayName = CSTRING(DisplayName);
                 statement = QUOTE(_target call FUNC(open));
-                condition = QUOTE(_target call FUNC(canOpen));
+                condition = QUOTE([ARR_2(_target,false)] call FUNC(canOpen));
+            };
+        };
+        class ACE_Actions {
+            class ACE_MainActions {
+                class GVAR(open) {
+                    displayName = CSTRING(DisplayName);
+                    statement = QUOTE(_target call FUNC(open));
+                    condition = QUOTE([ARR_2(_target,true)] call FUNC(canOpen));
+                };
             };
         };
     };
