@@ -8,27 +8,26 @@ on:
 
 jobs:
   build_extension:
-    strategy:
-      matrix:
-        arrays: [
-          os: { tag: "windows-latest", target: "x86_64-pc-windows-msvc" },
-        ]
-    runs-on: ${{ matrix.arrays.os.tag }}
+    runs-on: windows-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
       - name: Install latest
         uses: actions-rs/toolchain@v1
         with:
-          target: ${{ matrix.arrays.os.target }}
+          target: x86_64-pc-windows-msvc
           toolchain: stable
           default: true
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: build-x86_64-pc-windows-msvc
       - name: Cargo Build
         run: cargo build --release
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.arrays.os.target }}
+          name: x86_64-pc-windows-msvc
           path: target/release/live_radio.dll
           if-no-files-found: error
           retention-days: 30
