@@ -5,9 +5,11 @@ mainprefix = "z"
 
 [files]
 include = [
-    "live_radio.dll",
     "live_radio_x64.dll"
 ]
+
+[hemtt.publish]
+description = "README.md"
 
 [hemtt.launch.default]
 workshop = [
