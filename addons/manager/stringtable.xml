@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="Live Radio">
+    <Package name="Manager">
+        <Key ID="STR_Live_Radio_Manager_DebugMessages">
+            <English>Debug messages (RPT)</English>
+            <German>Debug-Meldungen (RPT)</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_DebugMessagesTooltip">
+            <English>Write DEBUG and TRACE messages from the radio extension to the Arma RPT log. Off by default. Warnings and errors remain visible.</English>
+            <German>DEBUG- und TRACE-Meldungen der Radio-Erweiterung ins Arma-RPT schreiben. Standardmäßig aus. Warnungen und Fehler bleiben sichtbar.</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_Inside3DAudio">
+            <English>3D audio inside cars and ships</English>
+            <German>3D-Ton in Autos und Schiffen</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_Inside3DAudioTooltip">
+            <English>When enabled, hear the original vehicle-center 3D position inside cars and ships. Off centers the sound on both ears. Aircraft are always centered inside. Only affects you.</English>
+            <German>Aktiviert kommt der Ton innen vom ursprünglichen 3D-Fahrzeugmittelpunkt. Aus zentriert ihn auf beiden Ohren. Fluggeräte sind innen immer mittig. Betrifft nur dich.</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_MuteAll">
+            <English>Mute all radios</English>
+            <German>Alle Radios stummschalten</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_MuteAllTooltip">
+            <English>Mute all radios only for you.</English>
+            <German>Alle Radios nur für dich stummschalten.</German>
+        </Key>
+    </Package>
+</Project>

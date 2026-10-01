@@ -1,5 +1,6 @@
 #include "script_component.hpp"
 /*
+ * Edited by: Joncantplay
  * Author: mharis001
  * Handles selecting an entry in the radio stations list.
  *
@@ -17,6 +18,7 @@
  */
 
 params ["_ctrlList", "_index"];
+if !([(ctrlParent _ctrlList) getVariable QGVAR(object)] call FUNC(canOpen)) exitWith {};
 
 // Exit if the list is currently locked
 // List selection changed due to clearing/adding entries or using lbSetCurSel command

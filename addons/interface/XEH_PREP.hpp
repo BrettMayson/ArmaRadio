@@ -1,7 +1,9 @@
 PREP(canOpen);
-PREP(handleDescriptionClick);
 PREP(handleListSelect);
 PREP(handlePower);
+PREP(handleCopyTitle);
+PREP(handleStreamer);
+PREP(handleMute);
 PREP(handleSearchButton);
 PREP(handleSearchClick);
 PREP(handleSearchKeyUp);
@@ -11,4 +13,6 @@ PREP(handleVolumeButtonUp);
 PREP(handleVolumeMouse);
 PREP(open);
 PREP(updateInfo);
+PREP(updateStatus);
 PREP(updateList);
+PREP(updateStreamer);

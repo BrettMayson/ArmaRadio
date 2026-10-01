@@ -1,5 +1,6 @@
 #include "script_component.hpp"
 /*
+ * Edited by: Joncantplay
  * Author: mharis001
  * Handles the mouse moving and holding events for the volume bar.
  *
@@ -17,6 +18,7 @@
  */
 
 params ["_ctrlVolumeBarMouse", "_mousePosX"];
+if !([(ctrlParent _ctrlVolumeBarMouse) getVariable QGVAR(object)] call FUNC(canOpen)) exitWith {};
 
 if (_ctrlVolumeBarMouse getVariable [QGVAR(moving), false]) then {
     // Convert from mouse position to volume level
@@ -29,5 +31,9 @@ if (_ctrlVolumeBarMouse getVariable [QGVAR(moving), false]) then {
 
     // Update the radio's volume
     private _object = _display getVariable QGVAR(object);
-    [_object, _volume] call EFUNC(manager,volume);
+    _ctrlVolumeBarMouse setVariable [QGVAR(pendingVolume), _volume];
+    if (diag_tickTime >= (_ctrlVolumeBarMouse getVariable [QGVAR(nextVolume), 0])) then {
+        _ctrlVolumeBarMouse setVariable [QGVAR(nextVolume), diag_tickTime + 0.1];
+        [_object, _volume] call EFUNC(manager,volume);
+    };
 };

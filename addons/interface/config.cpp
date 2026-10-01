@@ -8,7 +8,7 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {"live_radio_manager"};
         author = ECSTRING(main,Author);
-        authors[] = {"BrettMayson", "mharis001"};
+        authors[] = {"BrettMayson", "mharis001", "Joncantplay"};
         url = ECSTRING(main,URL);
         VERSION_CONFIG;
     };

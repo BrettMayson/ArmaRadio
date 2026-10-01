@@ -7,11 +7,15 @@ Tune in to real, live internet radio stations from vehicles and radios in Arma 3
 ## Features
 
 - **Real internet radio** — stream actual live stations, not looped audio files.
-- **Works in vehicles and objects** — enabled for cars and the FM Radio object out of the box.
+- **Works in vehicles and objects** — enabled for cars, aircraft, ships and the FM Radio object. Static weapons are excluded.
 - **Live metadata** — currently playing track title and album art are displayed as the station broadcasts them.
 - **Fully configurable stations** — add your own stations, complete with custom pictures and availability conditions.
 - **Streamer Mode** — automatically mute stations locally that haven't been verified as copyright-safe, without affecting what other players hear.
 - **Copyright Free Only** — server wide setting that restricts available stations to those marked as copyright-free.
+- **Personal mute controls** — mute one radio or all radios without changing audio for other players.
+- **Playback feedback** — loading, connection and retry status in the redesigned interface.
+- **MP3 and AAC-LC streams** — including AAC-LC over ADTS.
+- **Optional outside control** — communities can enable outside vehicle access in CBA settings; disabled by default. Driver and Commander Only blocks it.
 - **ACE compatible**
 
 ## Multiplayer

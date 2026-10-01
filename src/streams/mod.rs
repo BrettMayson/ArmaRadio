@@ -1,6 +1,8 @@
+// Based on the original Live Radio implementation by BrettMayson.
+// Playback and compatibility changes by Joncantplay.
 use std::{
     collections::HashMap,
-    sync::{Arc, OnceLock, RwLock, atomic::AtomicU8},
+    sync::{atomic::AtomicU8, Arc, OnceLock, RwLock},
 };
 
 use crossbeam_channel::{Receiver, Sender};
@@ -8,6 +10,7 @@ use simplemad::Decoder;
 
 use self::read::RemoteStream;
 
+mod aac;
 mod read;
 
 #[derive(Clone)]
@@ -15,7 +18,47 @@ pub struct Senders(pub Arc<RwLock<Vec<Sender<StreamPacket>>>>);
 
 impl Senders {
     pub fn push(&self, sender: Sender<StreamPacket>) {
-        self.0.write().expect("not poisoned").push(sender);
+        match self.0.write() {
+            Ok(mut senders) => senders.push(sender),
+            Err(_) => error!("Stream sender lock was poisoned"),
+        }
+    }
+
+    fn close(&self) {
+        let Ok(senders) = self.0.read() else {
+            error!("Stream sender lock was poisoned while closing a stream");
+            return;
+        };
+        for sender in senders.iter() {
+            let _ = sender.send(StreamPacket::Close);
+        }
+    }
+
+    fn send_samples(&self, samples: Vec<alto::Mono<f32>>, sample_rate: i32) -> bool {
+        let Ok(senders) = self.0.read() else {
+            error!("Stream sender lock was poisoned while sending audio");
+            return false;
+        };
+        let mut remove_closed = false;
+        for sender in senders.iter() {
+            if sender
+                .send(StreamPacket::Data(samples.clone(), sample_rate))
+                .is_err()
+            {
+                remove_closed = true;
+            }
+        }
+        drop(senders);
+
+        if remove_closed {
+            match self.0.write() {
+                Ok(mut senders) => {
+                    senders.retain(|sender| sender.send(StreamPacket::Check).is_ok())
+                }
+                Err(_) => return false,
+            }
+        }
+        true
     }
 }
 
@@ -30,67 +73,69 @@ impl Stream {
         let count = self.count.clone();
         let url = url.to_string();
         let senders = self.senders.clone();
+
         std::thread::spawn(move || {
-            let remote = RemoteStream::new(&url, senders.clone());
-            let Ok(remote) = remote else {
-                error!(
-                    "Failed to start stream: {}",
-                    remote.err().expect("error expected")
-                );
-                return;
-            };
-            let Ok(decoder) = Decoder::decode(remote) else {
-                error!("Failed to start stream: {url}");
-                for sender in senders.0.read().expect("not poisoned").iter() {
-                    let _ = sender.send(StreamPacket::Close);
+            let remote = match RemoteStream::new(&url, senders.clone()) {
+                Ok(remote) => remote,
+                Err(error) => {
+                    error!("Failed to start stream {url}: {error}");
+                    senders.close();
+                    return;
                 }
-                return;
             };
+
+            if remote.is_aac() {
+                if let Err(error) = aac::decode(remote, &count, &senders) {
+                    error!("AAC stream {url}: {error}");
+                }
+                senders.close();
+                return;
+            }
+
+            let decoder = match Decoder::decode(remote) {
+                Ok(decoder) => decoder,
+                Err(error) => {
+                    error!("Failed to create decoder for {url}: {error:?}");
+                    senders.close();
+                    return;
+                }
+            };
+
             for decoding_result in decoder {
                 if count.load(std::sync::atomic::Ordering::Relaxed) == 0 {
-                    debug!("no listeners, shutting down stream");
+                    debug!("No listeners remain for {url}; stopping stream");
                     break;
                 }
-                match decoding_result {
-                    Err(_) => {} // error!("Error: {:?}", e),
-                    Ok(frame) => {
-                        let mut samples: Vec<alto::Mono<f32>> = Vec::new();
-                        for i in 0..frame.samples[0].len() {
-                            samples.push(alto::Mono {
-                                center: f32::midpoint(
-                                    frame.samples[0][i].to_f32(),
-                                    frame.samples[1][i].to_f32(),
-                                ),
-                            });
-                        }
-                        let mut delete = false;
-                        for sender in senders.0.read().expect("not poisoned").iter() {
-                            if let Err(e) = sender.send(StreamPacket::Data(
-                                samples.clone(),
-                                frame.sample_rate.cast_signed(),
-                            )) {
-                                error!("Failed to send data: {e}");
-                                delete = true;
-                            }
-                        }
-                        if delete {
-                            senders
-                                .0
-                                .write()
-                                .expect("not poisoned")
-                                .retain(|s| s.send(StreamPacket::Check).is_ok());
-                        }
-                    }
+
+                let Ok(frame) = decoding_result else {
+                    continue;
+                };
+                let Some(left) = frame.samples.first() else {
+                    continue;
+                };
+                let right = frame.samples.get(1).unwrap_or(left);
+
+                let samples: Vec<alto::Mono<f32>> = left
+                    .iter()
+                    .zip(right.iter())
+                    .map(|(left, right)| alto::Mono {
+                        center: (left.to_f32() + right.to_f32()) / 2.0_f32,
+                    })
+                    .collect();
+
+                if !senders.send_samples(samples, frame.sample_rate as i32) {
+                    break;
                 }
             }
+            senders.close();
         });
     }
 }
 
 pub enum StreamPacket {
     Data(Vec<alto::Mono<f32>>, i32),
-    AlbumArt(String),
     Title(String),
+    AlbumArt(String),
     Close,
     Check,
 }
@@ -103,81 +148,82 @@ pub struct StreamListener {
 impl Drop for StreamListener {
     fn drop(&mut self) {
         self.count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
-        Streams::get()
-            .write()
-            .expect("not poisoned")
-            .iter()
-            .for_each(|(_, stream)| {
-                stream
-                    .senders
-                    .0
-                    .write()
-                    .expect("not poisoned")
-                    .retain(|s| s.send(StreamPacket::Check).is_ok());
-            });
+
+        let Ok(streams) = Streams::get().read() else {
+            error!("Stream map lock was poisoned while removing a listener");
+            return;
+        };
+        for stream in streams.values() {
+            match stream.senders.0.write() {
+                Ok(mut senders) => {
+                    senders.retain(|sender| sender.send(StreamPacket::Check).is_ok());
+                }
+                Err(_) => error!("Stream sender lock was poisoned while removing a listener"),
+            }
+        }
     }
 }
 
 pub struct Streams;
 
 impl Streams {
-    pub fn get() -> Arc<RwLock<HashMap<String, Stream>>> {
-        static SINGLETON: OnceLock<Arc<RwLock<HashMap<String, Stream>>>> = OnceLock::new();
-        SINGLETON
-            .get_or_init(|| Arc::new(RwLock::new(HashMap::new())))
-            .clone()
+    pub fn get() -> &'static RwLock<HashMap<String, Stream>> {
+        static STREAMS: OnceLock<RwLock<HashMap<String, Stream>>> = OnceLock::new();
+        STREAMS.get_or_init(|| RwLock::new(HashMap::new()))
     }
 
     pub fn listen(url: String) -> StreamListener {
         let (sender, receiver) = crossbeam_channel::unbounded();
-        if let Some(stream) = Self::get().read().expect("not poisoned").get(&url) {
-            debug!("using existing stream for {url}");
-            if stream
-                .count
-                .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
-                == 0
-            {
-                stream.start(&url);
+
+        match Self::get().read() {
+            Ok(streams) => {
+                if let Some(stream) = streams.get(&url) {
+                    debug!("Using existing stream for {url}");
+                    if stream
+                        .count
+                        .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+                        == 0
+                    {
+                        stream.start(&url);
+                    }
+                    stream.senders.push(sender);
+                    return StreamListener {
+                        receiver,
+                        count: stream.count.clone(),
+                    };
+                }
             }
-            stream.senders.push(sender);
-            return StreamListener {
-                receiver,
-                count: stream.count.clone(),
-            };
+            Err(_) => error!("Stream map lock was poisoned while finding a stream"),
         }
-        debug!("creating new stream for {url}");
+
+        debug!("Creating new stream for {url}");
         let stream = Stream {
             count: Arc::new(AtomicU8::new(1)),
             senders: Senders(Arc::new(RwLock::new(vec![sender]))),
         };
         stream.start(&url);
-        let sl = StreamListener {
+        let listener = StreamListener {
             receiver,
             count: stream.count.clone(),
         };
-        Self::get()
-            .write()
-            .expect("not poisoned")
-            .insert(url, stream);
-        sl
+
+        match Self::get().write() {
+            Ok(mut streams) => {
+                streams.insert(url, stream);
+            }
+            Err(_) => error!("Stream map lock was poisoned while creating a stream"),
+        }
+
+        listener
     }
 }
 
 #[cfg(test)]
 mod tests {
     #[test]
-    fn pulse_edm() {
+    fn it_works() {
         let receiver =
             super::Streams::listen("http://pulseedm.cdnstream1.com:8124/1373_128".to_string());
-        std::thread::sleep(std::time::Duration::from_secs(3));
-        drop(receiver);
-        std::thread::sleep(std::time::Duration::from_secs(3));
-    }
-
-    #[test]
-    fn classic_rock() {
-        let receiver =
-            super::Streams::listen("http://listen.classicrock109.com:10042".to_string());
         std::thread::sleep(std::time::Duration::from_secs(3));
         drop(receiver);
         std::thread::sleep(std::time::Duration::from_secs(3));

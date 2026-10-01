@@ -1,13 +1,7 @@
 #include "script_component.hpp"
-
 params ["_source", "_gain"];
-
-private _sources = (keys GVAR(sources));
-private _index = _sources findIf { (GVAR(sources) get _x) isEqualTo _source };
-if (_index == -1) exitWith {};
-
-private _id = _sources select _index;
-
+_gain = (_gain max 0) min 2;
+if (abs ((_source getVariable [QGVAR(volume), 1]) - _gain) < 0.005) exitWith {};
 _source setVariable [QGVAR(volume), _gain, true];
-
-[QGVAR(volume), [_id, _gain]] call CBA_fnc_globalEvent;
+private _id = (_source getVariable [QGVAR(active), []]) param [0, ""];
+if (_id != "") then {[QGVAR(volume), [_id, _gain]] call CBA_fnc_globalEvent};

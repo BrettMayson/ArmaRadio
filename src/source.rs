@@ -1,11 +1,12 @@
+// Based on the original Live Radio implementation by BrettMayson.
+// Playback and compatibility changes by Joncantplay.
 use std::{
     collections::HashMap,
     sync::{
-        Arc, Mutex, OnceLock, RwLock,
         atomic::AtomicU8,
         mpsc::{self, Receiver, Sender},
+        Mutex, OnceLock, RwLock,
     },
-    time::SystemTime,
 };
 
 use alto::Source;
@@ -15,7 +16,6 @@ use crossbeam_channel::TryRecvError;
 use crate::{
     listener::Listener,
     streams::{StreamPacket, Streams},
-    vector3::Vector3,
 };
 
 pub struct Sources();
@@ -23,16 +23,14 @@ pub struct Sources();
 type SourceMap = RwLock<HashMap<String, Mutex<SoundSource>>>;
 
 impl Sources {
-    pub fn get() -> Arc<SourceMap> {
-        static SINGLETON: OnceLock<Arc<SourceMap>> = OnceLock::new();
-        SINGLETON
-            .get_or_init(|| Arc::new(RwLock::new(HashMap::new())))
-            .clone()
+    pub fn get() -> &'static SourceMap {
+        static SOURCES: OnceLock<SourceMap> = OnceLock::new();
+        SOURCES.get_or_init(|| RwLock::new(HashMap::new()))
     }
 }
 
 enum SoundCommand {
-    SetPos(Vector3, Vector3),
+    SetPos([f32; 3]),
     SetGain(f32),
     RefreshGain,
     Destroy,
@@ -40,8 +38,6 @@ enum SoundCommand {
 
 #[derive(Debug)]
 pub struct SoundSource {
-    position: Vector3,
-    time: SystemTime,
     channel: Sender<SoundCommand>,
 }
 
@@ -49,7 +45,7 @@ impl SoundSource {
     pub fn new(ctx: Context, id: String, url: String, gain: f32) -> Self {
         let (tx, rx): (Sender<SoundCommand>, Receiver<SoundCommand>) = mpsc::channel();
         std::thread::spawn(move || {
-            debug!("Starting source `{id}`");
+            debug!("Starting source `{}`", id);
             let stream = Streams::listen(url);
             let Some(listener) = Listener::get() else {
                 return;
@@ -58,43 +54,44 @@ impl SoundSource {
                 error!("Error creating source");
                 return;
             };
-            source
-                .set_soft_spatialization(alto::SoftSourceSpatialization::Enabled)
-                .expect("Error setting soft spatialization");
-            source
-                .set_gain(
-                    gain * f32::from(
-                        ctx.group()
-                            .get::<AtomicU8>()
-                            .map_or(255, |gain| gain.load(std::sync::atomic::Ordering::Relaxed)),
-                    ) / 255.0,
-                )
-                .expect("Error setting gain");
+            if let Err(error) =
+                source.set_soft_spatialization(alto::SoftSourceSpatialization::Enabled)
+            {
+                error!("Error setting soft spatialization for {id}: {error}");
+                return;
+            }
+            if let Err(error) = source.set_gain(
+                gain * ctx
+                    .group()
+                    .get::<AtomicU8>()
+                    .map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed))
+                    .unwrap_or(255) as f32
+                    / 255.0,
+            ) {
+                error!("Error setting initial gain for {id}: {error}");
+                return;
+            }
             let mut specific_gain = gain;
             'outer: loop {
                 while let Ok(command) = rx.try_recv() {
                     match command {
-                        #[allow(unused_variables)]
-                        SoundCommand::SetPos(pos, vel) => {
-                            if source.set_position([pos.x, pos.y, pos.z]).is_err() {
-                                error!("Error setting position for {id}");
-                            }
-                            if cfg!(not(test))
-                                && source.set_velocity([vel.x, vel.y, vel.z]).is_err()
-                            {
-                                error!("Error setting velocity for {id}");
+                        SoundCommand::SetPos(pos) => {
+                            if source.set_position(pos).is_err() {
+                                error!("Error setting position for {}", id);
                             }
                         }
                         SoundCommand::SetGain(gain) => {
-                            debug!("Setting gain to {gain} for {id}");
+                            debug!("Setting gain to {} for {}", gain, id);
                             specific_gain = gain;
                             if source
                                 .set_gain(
-                                    gain * f32::from(
-                                        ctx.group().get::<AtomicU8>().map_or(255, |gain| {
-                                            gain.load(std::sync::atomic::Ordering::Relaxed)
-                                        }),
-                                    ) / 255.0,
+                                    gain * ctx
+                                        .group()
+                                        .get::<AtomicU8>()
+                                        .map(|gain| gain.load(std::sync::atomic::Ordering::Relaxed))
+                                        .unwrap_or(255)
+                                        as f32
+                                        / 255.0,
                                 )
                                 .is_err()
                             {
@@ -102,15 +99,18 @@ impl SoundSource {
                             }
                         }
                         SoundCommand::RefreshGain => {
-                            debug!("Refreshing gain for {id}");
+                            debug!("Refreshing gain for {}", id);
                             if source
                                 .set_gain(
                                     specific_gain
-                                        * f32::from(
-                                            ctx.group().get::<AtomicU8>().map_or(255, |gain| {
+                                        * ctx
+                                            .group()
+                                            .get::<AtomicU8>()
+                                            .map(|gain| {
                                                 gain.load(std::sync::atomic::Ordering::Relaxed)
-                                            }),
-                                        )
+                                            })
+                                            .unwrap_or(255)
+                                            as f32
                                         / 255.0,
                                 )
                                 .is_err()
@@ -119,7 +119,7 @@ impl SoundSource {
                             }
                         }
                         SoundCommand::Destroy => {
-                            debug!("Source `{id}` has been told to destroy");
+                            debug!("Source `{}` has been told to destroy", id);
                             source.stop();
                             break 'outer;
                         }
@@ -133,7 +133,8 @@ impl SoundSource {
                                     if let Ok(mut buffer) = source.unqueue_buffer() {
                                         if let Err(e) = buffer.set_data(samples, freq) {
                                             error!(
-                                                "Error setting buffer sample data for {id}: {e}"
+                                                "Error setting buffer sample data for {}: {}",
+                                                id, e
                                             );
                                             continue;
                                         }
@@ -143,7 +144,7 @@ impl SoundSource {
                                             return;
                                         };
                                         let Ok(buffer) = listener.new_buffer(samples, freq) else {
-                                            error!("Error creating buffer for {id}");
+                                            error!("Error creating buffer for {}", id);
                                             continue;
                                         };
                                         buffer
@@ -153,19 +154,22 @@ impl SoundSource {
                                         return;
                                     };
                                     let Ok(buffer) = listener.new_buffer(samples, freq) else {
-                                        error!("Error creating buffer for {id}");
+                                        error!("Error creating buffer for {}", id);
                                         continue;
                                     };
                                     buffer
                                 };
                                 if let Err(e) = source.queue_buffer(buffer) {
-                                    error!("killing thread, error queueing buffer for {id}: {e}");
+                                    error!(
+                                        "killing thread, error queueing buffer for {}: {}",
+                                        id, e
+                                    );
                                     return;
                                 }
                                 if source.state() != alto::SourceState::Playing
                                     && source.buffers_queued() > 75
                                 {
-                                    info!("Playing source for {id}, {:?}", source.state());
+                                    info!("Playing source for {}, {:?}", id, source.state());
                                     source.play();
                                 }
                             }
@@ -174,7 +178,7 @@ impl SoundSource {
                                     .callback_data(
                                         "live_radio",
                                         "title",
-                                        Some(vec![id.clone(), title]),
+                                        Some(vec![id.to_string(), title]),
                                     )
                                     .is_err()
                                 {
@@ -183,20 +187,12 @@ impl SoundSource {
                                 }
                             }
                             StreamPacket::AlbumArt(path) => {
-                                if ctx
-                                    .callback_data(
-                                        "live_radio",
-                                        "album_art",
-                                        Some(vec![id.clone(), path]),
-                                    )
-                                    .is_err()
-                                {
-                                    // arma is probably closed
+                                if ctx.callback_data("live_radio", "album_art", Some(vec![id.to_string(), path])).is_err() {
                                     break;
                                 }
                             }
                             StreamPacket::Close => {
-                                debug!("Stream closed for {id}");
+                                debug!("Stream closed for {}", id);
                                 source.stop();
                                 break;
                             }
@@ -209,42 +205,18 @@ impl SoundSource {
                         std::thread::sleep(std::time::Duration::from_millis(16));
                     }
                     Err(TryRecvError::Disconnected) => {
-                        error!("Stream receiver disconnected for {id}");
+                        error!("Stream receiver disconnected for {}", id);
                         break;
                     }
                 }
             }
-            debug!("Source `{id}` has died");
+            debug!("Source `{}` has died", id);
         });
-        Self {
-            position: Vector3::new(0.0, 0.0, 0.0),
-            time: SystemTime::now(),
-            channel: tx,
-        }
+        Self { channel: tx }
     }
 
-    pub fn set_position(&mut self, position: [f32; 3]) {
-        let old = self.time;
-        self.time = SystemTime::now();
-        let dif = self
-            .time
-            .duration_since(old)
-            .expect("time doesn't flow backwards");
-        #[allow(clippy::cast_precision_loss)]
-        let elapsed: f32 = (dif.as_secs() as f32) + (dif.subsec_nanos() as f32 / 1_000_000_000.0);
-
-        if elapsed == 0.0 {
-            return;
-        }
-
-        let velocity = self
-            .position
-            .update(position[0], position[1], position[2], elapsed);
-        if self
-            .channel
-            .send(SoundCommand::SetPos(self.position, velocity))
-            .is_err()
-        {
+    pub fn set_position(&self, position: [f32; 3]) {
+        if self.channel.send(SoundCommand::SetPos(position)).is_err() {
             error!("error sending position update");
         }
     }
@@ -256,9 +228,9 @@ impl SoundSource {
     }
 
     pub fn refresh_gain(&self) {
-        self.channel
-            .send(SoundCommand::RefreshGain)
-            .expect("not poisoned");
+        if self.channel.send(SoundCommand::RefreshGain).is_err() {
+            error!("error sending gain refresh");
+        }
     }
 }
 
@@ -273,7 +245,10 @@ impl Drop for SoundSource {
 
 pub fn cleanup() {
     debug!("cleaning up sources");
-    Sources::get().write().expect("not poisoned").clear();
+    match Sources::get().write() {
+        Ok(mut sources) => sources.clear(),
+        Err(_) => error!("Source map lock was poisoned during cleanup"),
+    }
 }
 
 pub fn group() -> Group {
@@ -288,45 +263,71 @@ pub fn group() -> Group {
 }
 
 fn command_new(ctx: Context, id: String, source: String, gain: f32) -> String {
-    Sources::get().write().expect("not poisoned").insert(
-        id.clone(),
-        Mutex::new(SoundSource::new(ctx, id.clone(), source, gain)),
-    );
-    id
+    match Sources::get().write() {
+        Ok(mut sources) => {
+            sources.insert(
+                id.clone(),
+                Mutex::new(SoundSource::new(ctx, id.clone(), source, gain)),
+            );
+            id
+        }
+        Err(_) => {
+            error!("Source map lock was poisoned while creating a source");
+            String::new()
+        }
+    }
 }
 
 fn command_destroy(id: String) -> bool {
-    Sources::get()
-        .write()
-        .expect("not poisoned")
-        .remove(&id)
-        .is_some()
+    match Sources::get().write() {
+        Ok(mut sources) => sources.remove(&id).is_some(),
+        Err(_) => {
+            error!("Source map lock was poisoned while destroying a source");
+            false
+        }
+    }
 }
 
 pub fn command_set_position(id: String, x: f32, y: f32, z: f32) {
-    if let Some(src) = Sources::get().read().expect("not poisoned").get(&id) {
-        src.lock().expect("not poisoned").set_position([x, y, z]);
+    let Ok(sources) = Sources::get().read() else {
+        error!("Source map lock was poisoned while setting position");
+        return;
+    };
+    if let Some(src) = sources.get(&id) {
+        match src.lock() {
+            Ok(src) => src.set_position([x, y, z]),
+            Err(_) => error!("Source lock was poisoned while setting position for {id}"),
+        }
     }
 }
 
 pub fn command_set_gain(id: String, gain: f32) {
-    if let Some(src) = Sources::get().read().expect("not poisoned").get(&id) {
-        src.lock().expect("not poisoned").set_gain(gain);
+    let Ok(sources) = Sources::get().read() else {
+        error!("Source map lock was poisoned while setting gain");
+        return;
+    };
+    if let Some(src) = sources.get(&id) {
+        match src.lock() {
+            Ok(src) => src.set_gain(gain),
+            Err(_) => error!("Source lock was poisoned while setting gain for {id}"),
+        }
     }
 }
 
 pub fn command_set_global_gain(ctx: Context, gain: f32) {
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     let gain = (gain * 255.0) as u8;
-    debug!("Setting global gain to {gain}");
+    debug!("Setting global gain to {}", gain);
     if let Some(state) = ctx.group().get::<AtomicU8>() {
         state.store(gain, std::sync::atomic::Ordering::Relaxed);
     }
-    Sources::get()
-        .read()
-        .expect("not poisoned")
-        .iter()
-        .for_each(|(_, src)| {
-            src.lock().expect("not poisoned").refresh_gain();
-        });
+    let Ok(sources) = Sources::get().read() else {
+        error!("Source map lock was poisoned while refreshing gain");
+        return;
+    };
+    for (id, src) in sources.iter() {
+        match src.lock() {
+            Ok(src) => src.refresh_gain(),
+            Err(_) => error!("Source lock was poisoned while refreshing gain for {id}"),
+        }
+    }
 }
