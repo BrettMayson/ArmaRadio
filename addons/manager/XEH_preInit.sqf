@@ -32,7 +32,7 @@ EXT callExtension "";
 [
     QGVAR(volumeMultiplier),
     "SLIDER",
-    "Volume Multiplier",
+    localize "STR_Live_Radio_Manager_VolumeMultiplier",
     "Live Radio",
     [0.1, 1, 0.5, 2, true],
     0,
@@ -47,17 +47,18 @@ EXT callExtension "";
     "Live Radio", false, 2, {}, false
 ] call CBA_fnc_addSetting;
 
-// Streamer Mode is owned by the interface and saved directly in the local profile.
-if (isNil {profileNamespace getVariable QGVAR(streamerMode)}) then {
-    private _oldHash = profileNamespace getVariable ["cba_settings_hash", []];
-    private _previous = [false, 0];
-    if (_oldHash isEqualType [] && {count _oldHash >= 3}) then {
-        _previous = [_oldHash, toLower QGVAR(streamerMode), [false, 0]] call CBA_fnc_hashGet;
-    };
-    profileNamespace setVariable [QGVAR(streamerMode), _previous param [0, false, [false]]];
-    saveProfileNamespace;
-};
-GVAR(streamerMode) = profileNamespace getVariable [QGVAR(streamerMode), false];
+// Keep the previous interface-only preference when migrating to CBA settings.
+private _savedStreamerMode = profileNamespace getVariable [QGVAR(streamerMode), false];
+[
+    QGVAR(streamerMode), "CHECKBOX",
+    [localize "STR_Live_Radio_Manager_StreamerMode", localize "STR_Live_Radio_Interface_StreamerTooltip"],
+    "Live Radio", _savedStreamerMode, 2,
+    {
+        // CBA updates the missionNamespace value and persists the client setting.
+        if (GVAR(playbackReady)) then {call FUNC(refreshPlayback)};
+        [QGVAR(streamerModeChanged), []] call CBA_fnc_localEvent;
+    }, false
+] call CBA_fnc_addSetting;
 [
     QGVAR(muteAll), "CHECKBOX",
     [localize "STR_Live_Radio_Manager_MuteAll", localize "STR_Live_Radio_Manager_MuteAllTooltip"],

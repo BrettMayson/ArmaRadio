@@ -191,6 +191,11 @@ impl SoundSource {
                                     break;
                                 }
                             }
+                            StreamPacket::Error(message) => {
+                                let _ = ctx.callback_data(
+                                    "live_radio", "error", Some(vec![id.clone(), message]),
+                                );
+                            }
                             StreamPacket::Close => {
                                 debug!("Stream closed for {}", id);
                                 source.stop();

@@ -21,14 +21,14 @@ class GVAR(display) {
             y = QUOTE(CENTER_Y - GRID_H(58));
             w = QUOTE(GRID_W(152));
             h = QUOTE(GRID_H(116));
-            colorBackground[] = {0.055, 0.065, 0.08, 0.97};
+            colorBackground[] = {0.055, 0.065, 0.08, 0.72};
         };
         class Footer: ctrlStaticFooter {
             x = QUOTE(CENTER_X - GRID_W(76));
             y = QUOTE(CENTER_Y + GRID_H(43));
             w = QUOTE(GRID_W(152));
             h = QUOTE(GRID_H(15));
-            colorBackground[] = {0.08, 0.095, 0.115, 1};
+            colorBackground[] = {0.08, 0.095, 0.115, 0.35};
         };
         class Title: ctrlStaticTitle {
             text = CSTRING(DisplayName);
@@ -47,7 +47,7 @@ class GVAR(display) {
             h = QUOTE(GRID_H(79));
             sizeEx = QUOTE(GRID_H(4.2));
             rowHeight = QUOTE(GRID_H(5.3));
-            colorBackground[] = {0.025, 0.035, 0.045, 0.88};
+            colorBackground[] = {0.025, 0.035, 0.045, 0.25};
             colorText[] = {0.92, 0.94, 0.97, 1};
             colorSelect[] = {1, 1, 1, 1};
             colorSelect2[] = {1, 1, 1, 1};
@@ -65,24 +65,35 @@ class GVAR(display) {
             idc = IDC_SEARCH_BAR;
             x = QUOTE(CENTER_X - GRID_W(66));
             y = QUOTE(CENTER_Y + GRID_H(34));
-            w = QUOTE(GRID_W(80));
+            w = QUOTE(GRID_W(58));
             h = QUOTE(GRID_H(6));
             sizeEx = QUOTE(GRID_H(4.2));
-            colorBackground[] = {0.025, 0.035, 0.045, 0.88};
+            colorBackground[] = {0.025, 0.035, 0.045, 0.25};
+        };
+        class Presets: ctrlButton {
+            idc = IDC_PRESETS;
+            text = CSTRING(Presets);
+            tooltip = CSTRING(PresetsTooltip);
+            x = QUOTE(CENTER_X - GRID_W(7));
+            y = QUOTE(CENTER_Y + GRID_H(34));
+            w = QUOTE(GRID_W(21));
+            h = QUOTE(GRID_H(6));
+            sizeEx = QUOTE(GRID_H(3.2));
+            colorBackground[] = {0.14, 0.26, 0.3, 1};
         };
         class DetailsBackground: ctrlStatic {
             x = QUOTE(CENTER_X + GRID_W(18));
             y = QUOTE(CENTER_Y - GRID_H(48));
             w = QUOTE(GRID_W(55));
             h = QUOTE(GRID_H(88));
-            colorBackground[] = {0.075, 0.09, 0.11, 1};
+            colorBackground[] = {0.075, 0.09, 0.11, 0.20};
         };
         class PictureBackground: ctrlStatic {
             x = QUOTE(CENTER_X + GRID_W(31));
             y = QUOTE(CENTER_Y - GRID_H(45));
             w = QUOTE(GRID_W(29));
             h = QUOTE(GRID_H(29));
-            colorBackground[] = {0.035, 0.045, 0.06, 1};
+            colorBackground[] = {0.035, 0.045, 0.06, 0.35};
         };
         class Picture: ctrlStaticPictureKeepAspect {
             idc = IDC_PICTURE;
@@ -113,7 +124,7 @@ class GVAR(display) {
             x = QUOTE(CENTER_X + GRID_W(20));
             y = QUOTE(CENTER_Y - GRID_H(1));
             w = QUOTE(GRID_W(51));
-            h = QUOTE(GRID_H(9));
+            h = QUOTE(GRID_H(8));
             sizeEx = QUOTE(GRID_H(3.5));
             colorText[] = {0.66, 0.72, 0.78, 1};
         };
@@ -123,7 +134,7 @@ class GVAR(display) {
             x = QUOTE(CENTER_X + GRID_W(20));
             y = QUOTE(CENTER_Y - GRID_H(1));
             w = QUOTE(GRID_W(51));
-            h = QUOTE(GRID_H(9));
+            h = QUOTE(GRID_H(8));
             colorBackground[] = {0, 0, 0, 0};
             colorBackgroundActive[] = {0, 0, 0, 0};
             colorBackgroundDisabled[] = {0, 0, 0, 0};
@@ -143,7 +154,7 @@ class GVAR(display) {
             w = QUOTE(GRID_W(51));
             h = QUOTE(GRID_H(8));
             sizeEx = QUOTE(GRID_H(3.3));
-            colorBackground[] = {0.04, 0.055, 0.07, 1};
+            colorBackground[] = {0.04, 0.055, 0.07, 0.35};
         };
         class Retry: ctrlButton {
             idc = IDC_RETRY;

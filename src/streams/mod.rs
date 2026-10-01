@@ -11,6 +11,7 @@ use simplemad::Decoder;
 use self::read::RemoteStream;
 
 mod aac;
+mod ffmpeg;
 mod read;
 
 #[derive(Clone)]
@@ -21,6 +22,14 @@ impl Senders {
         match self.0.write() {
             Ok(mut senders) => senders.push(sender),
             Err(_) => error!("Stream sender lock was poisoned"),
+        }
+    }
+
+    fn fail(&self, message: String) {
+        if let Ok(senders) = self.0.read() {
+            for sender in senders.iter() {
+                let _ = sender.send(StreamPacket::Error(message.clone()));
+            }
         }
     }
 
@@ -78,15 +87,26 @@ impl Stream {
             let remote = match RemoteStream::new(&url, senders.clone()) {
                 Ok(remote) => remote,
                 Err(error) => {
+                    if error.starts_with("hls:") {
+                        if let Err(error) = ffmpeg::decode(&url, &count, &senders) {
+                            error!("Modern stream {url}: {error}");
+                            senders.fail(error);
+                        }
+                        senders.close();
+                        return;
+                    }
                     error!("Failed to start stream {url}: {error}");
+                    senders.fail(error);
                     senders.close();
                     return;
                 }
             };
 
             if remote.is_aac() {
-                if let Err(error) = aac::decode(remote, &count, &senders) {
+                drop(remote);
+                if let Err(error) = ffmpeg::decode(&url, &count, &senders) {
                     error!("AAC stream {url}: {error}");
+                    senders.fail(error);
                 }
                 senders.close();
                 return;
@@ -96,11 +116,14 @@ impl Stream {
                 Ok(decoder) => decoder,
                 Err(error) => {
                     error!("Failed to create decoder for {url}: {error:?}");
+                    senders.fail("decode: Could not initialize the MP3 decoder".to_string());
                     senders.close();
                     return;
                 }
             };
 
+            let mut invalid_frames = 0;
+            let mut decoded_audio = false;
             for decoding_result in decoder {
                 if count.load(std::sync::atomic::Ordering::Relaxed) == 0 {
                     debug!("No listeners remain for {url}; stopping stream");
@@ -108,8 +131,15 @@ impl Stream {
                 }
 
                 let Ok(frame) = decoding_result else {
+                    invalid_frames += 1;
+                    if invalid_frames >= 100 {
+                        senders.fail("unsupported: Unsupported codec or damaged MP3 stream".to_string());
+                        break;
+                    }
                     continue;
                 };
+                invalid_frames = 0;
+                decoded_audio = true;
                 let Some(left) = frame.samples.first() else {
                     continue;
                 };
@@ -127,6 +157,11 @@ impl Stream {
                     break;
                 }
             }
+            if !decoded_audio && invalid_frames < 100 && count.load(std::sync::atomic::Ordering::Relaxed) > 0 {
+                let message = "unsupported: No decodable MP3 audio was received".to_string();
+                error!("Stream {url}: {message}");
+                senders.fail(message);
+            }
             senders.close();
         });
     }
@@ -136,6 +171,7 @@ pub enum StreamPacket {
     Data(Vec<alto::Mono<f32>>, i32),
     Title(String),
     AlbumArt(String),
+    Error(String),
     Close,
     Check,
 }
@@ -147,12 +183,15 @@ pub struct StreamListener {
 
 impl Drop for StreamListener {
     fn drop(&mut self) {
-        self.count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
-
-        let Ok(streams) = Streams::get().read() else {
+        let Ok(mut streams) = Streams::get().write() else {
+            self.count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
             error!("Stream map lock was poisoned while removing a listener");
             return;
         };
+        // Remove the last listener and cached stream under the same lock. A retry
+        // gets a fresh counter, so the old decoder cannot resume with the new one.
+        self.count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+        streams.retain(|_, stream| stream.count.load(std::sync::atomic::Ordering::SeqCst) > 0);
         for stream in streams.values() {
             match stream.senders.0.write() {
                 Ok(mut senders) => {
@@ -179,6 +218,7 @@ impl Streams {
             Ok(streams) => {
                 if let Some(stream) = streams.get(&url) {
                     debug!("Using existing stream for {url}");
+                    stream.senders.push(sender);
                     if stream
                         .count
                         .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
@@ -186,7 +226,6 @@ impl Streams {
                     {
                         stream.start(&url);
                     }
-                    stream.senders.push(sender);
                     return StreamListener {
                         receiver,
                         count: stream.count.clone(),

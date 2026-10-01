@@ -1,17 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <Project name="Live Radio">
     <Package name="Interface">
-        <Key ID="STR_Live_Radio_Interface_CopyTitleTooltip">
-            <English>Click to copy the current track</English>
-            <German>Klicken, um den aktuellen Titel zu kopieren</German>
+        <Key ID="STR_Live_Radio_Interface_GlobalStations">
+            <English>Global station list</English>
+            <German>Globale Senderliste</German>
+            <Spanish>Lista global de emisoras</Spanish>
         </Key>
-        <Key ID="STR_Live_Radio_Interface_CopyrightFreeOnly">
-            <English>Copyright Free Only</English>
-            <Spanish>Solo libres de derechos de autor</Spanish>
-            <German>Nur urheberrechtsfrei</German>
+        <Key ID="STR_Live_Radio_Interface_GlobalStationsTooltip">
+            <English>Shared server/mission stations for all players. Format: [["Name","https://stream",false]]. The last value approves the station for Streamer Mode. Personal lists remain separate.</English>
+            <German>Gemeinsame Server-/Missionssender für alle Spieler. Format: [["Name","https://stream",false]]. Der letzte Wert gibt den Sender für den Streamer Mode frei. Persönliche Listen bleiben separat.</German>
+            <Spanish>Emisoras del servidor o misión para todos. Formato: [["Nombre","https://stream",false]]. El último valor aprueba la emisora para Streamer Mode. Las listas personales siguen separadas.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_GlobalStationsInvalid">
+            <English>Invalid global station list. Use up to 100 entries: [["Name","https://stream",false]]. The last valid list is retained.</English>
+            <German>Ungültige globale Senderliste. Maximal 100 Einträge: [["Name","https://stream",false]]. Die letzte gültige Liste bleibt erhalten.</German>
+            <Spanish>Lista global inválida. Máximo 100 entradas: [["Nombre","https://stream",false]]. Se conserva la última lista válida.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_NowPlaying">
+            <English>Now playing: %1</English>
+            <German>Aktueller Titel: %1</German>
+            <Spanish>Reproduciendo: %1</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_CopyTitle">
+            <English>Copy current track</English>
+            <German>Aktuellen Titel kopieren</German>
+            <Spanish>Copiar el título actual</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_CopyTitleTooltip">
+            <English>Right-click to copy the current track</English>
+            <German>Rechtsklicken, um den aktuellen Titel zu kopieren</German>
+            <Spanish>Haz clic derecho para copiar el título actual</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_DisplayName">
             <English>FM Radio</English>
+            <Spanish>Radio FM</Spanish>
+            <German>FM Radio</German>
         </Key>
         <Key ID="STR_Live_Radio_Interface_DriverCommanderOnly">
             <English>Driver and Commander Only</English>
@@ -21,6 +44,17 @@
         <Key ID="STR_Live_Radio_Interface_Empty">
             <English>No matching stations</English>
             <German>Keine passenden Sender</German>
+            <Spanish>No hay emisoras coincidentes</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_HideDefaultStations">
+            <English>Disable default radio stations</English>
+            <German>Standardsender deaktivieren</German>
+            <Spanish>Desactivar emisoras predeterminadas</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_HideDefaultStationsTooltip">
+            <English>Disable bundled stations. Keep stations from expansions, missions and personal lists.</English>
+            <German>Mitgelieferte Sender deaktivieren. Sender aus Erweiterungen, Missionen und persönlichen Listen behalten.</German>
+            <Spanish>Desactivar emisoras incluidas. Mantener las de expansiones, misiones y listas personales.</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_InteractOutsideVehicle">
             <English>Allow radio control outside vehicles</English>
@@ -30,86 +64,267 @@
         <Key ID="STR_Live_Radio_Interface_InteractOutsideVehicleTooltip">
             <English>Allow players on foot to control vehicle radios. Driver and Commander Only still blocks outside access.</English>
             <German>Erlaubt Personen außerhalb die Steuerung von Fahrzeugradios. Nur Fahrer und Kommandant sperrt den Zugriff weiterhin.</German>
+            <Spanish>Permitir controlar las radios de vehículos desde fuera. La opción Solo conductor y comandante sigue bloqueando el acceso exterior.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_InterfaceStyle">
+            <English>Interface style</English>
+            <German>Interface-Stil</German>
+            <Spanish>Estilo de la interfaz</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_InterfaceStyleTooltip">
+            <English>Modern or the original-style Classic layout. Applied the next time you open a radio.</English>
+            <German>Modern oder das ursprüngliche Classic-Layout. Wird beim nächsten Öffnen eines Radios angewendet.</German>
+            <Spanish>Diseño Moderno o Clásico. Se aplica la próxima vez que abras una radio.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_ModuleNoTarget">
+            <English>Place the module on an object in Zeus, or synchronize it to an object in Eden.</English>
+            <German>Modul in Zeus auf ein Objekt setzen oder in Eden mit einem Objekt synchronisieren.</German>
+            <Spanish>Coloca el módulo sobre un objeto en Zeus o sincronízalo con un objeto en Eden.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_ModuleRadio">
+            <English>Enable FM Radio on object</English>
+            <German>FM Radio auf Objekt aktivieren</German>
+            <Spanish>Activar Radio FM en un objeto</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_Mute">
             <English>Mute for me</English>
             <German>Für mich stumm</German>
+            <Spanish>Silenciar para mí</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_MuteTooltip">
             <English>Mute this radio only for you.</English>
             <German>Dieses Radio nur für dich stummschalten.</German>
+            <Spanish>Silenciar esta radio solo para ti.</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_NoTrackInfo">
             <English>No track information</English>
             <German>Keine Titelinformationen</German>
+            <Spanish>Sin información del título</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PersonalStations">
+            <English>Personal station list</English>
+            <German>Persönliche Senderliste</German>
+            <Spanish>Lista personal de emisoras</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PersonalStationsInvalid">
+            <English>Invalid station list. Use [["Name","https://stream-url",false]] with up to 100 entries. Your previous list remains active.</English>
+            <German>Ungültige Senderliste. Format: [["Name","https://stream-url",false]], höchstens 100 Einträge. Die bisherige Liste bleibt aktiv.</German>
+            <Spanish>Lista no válida. Usa [["Nombre","https://url-del-stream",false]] con un máximo de 100 entradas. Tu lista anterior sigue activa.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PersonalStationsTooltip">
+            <English>Saved across missions. Use [["Station name","https://stream-url",false]]. The last value marks your approval for Streamer Mode.</English>
+            <German>Missionsübergreifend gespeichert. Format: [["Sendername","https://stream-url",false]]. Der letzte Wert ist deine Streamer-Mode-Freigabe.</German>
+            <Spanish>Se guarda entre misiones. Usa [["Nombre","https://url-del-stream",false]]. El último valor indica tu aprobación para el modo streamer.</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_PowerOff">
             <English>Switch radio off for everyone nearby</English>
             <German>Radio für alle in der Nähe ausschalten</German>
+            <Spanish>Apagar la radio para todos los jugadores cercanos</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_PowerOn">
             <English>Switch radio on for everyone nearby</English>
             <German>Radio für alle in der Nähe einschalten</German>
+            <Spanish>Encender la radio para todos los jugadores cercanos</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetApproved">
+            <English>Approved for my Streamer Mode</English>
+            <German>Für meinen Streamer Mode freigegeben</German>
+            <Spanish>Aprobada para mi modo streamer</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetClose">
+            <English>Close</English>
+            <German>Schließen</German>
+            <Spanish>Cerrar</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetDelete">
+            <English>Delete</English>
+            <German>Löschen</German>
+            <Spanish>Eliminar</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetInvalid">
+            <English>Enter a name and an HTTP(S) stream URL.</English>
+            <German>Name und eine HTTP(S)-Stream-URL eingeben.</German>
+            <Spanish>Introduce un nombre y una URL HTTP(S).</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetLimit">
+            <English>Maximum 100 personal stations.</English>
+            <German>Höchstens 100 persönliche Sender.</German>
+            <Spanish>Máximo 100 emisoras personales.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetName">
+            <English>Station name</English>
+            <German>Sendername</German>
+            <Spanish>Nombre de la emisora</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetNew">
+            <English>New</English>
+            <German>Neu</German>
+            <Spanish>Nueva</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetNote">
+            <English>Your list is saved across missions. Playing a station shares its URL with other listeners. Their personal mute and Streamer Mode settings still apply.</English>
+            <German>Deine Liste wird missionsübergreifend gespeichert. Beim Abspielen wird die URL mit anderen Hörern geteilt. Ihre persönlichen Mute- und Streamer-Mode-Einstellungen gelten weiterhin.</German>
+            <Spanish>Tu lista se guarda entre misiones. Al reproducir una emisora, su URL se comparte con otros oyentes. Sus ajustes personales de silencio y modo streamer siguen activos.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetSave">
+            <English>Save</English>
+            <German>Speichern</German>
+            <Spanish>Guardar</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetTitle">
+            <English>Personal radio stations</English>
+            <German>Persönliche Radiosender</German>
+            <Spanish>Emisoras personales</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetURL">
+            <English>Direct stream URL</English>
+            <German>Direkte Stream-URL</German>
+            <Spanish>URL directa de la transmisión</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_Presets">
+            <English>Stations</English>
+            <German>Sender</German>
+            <Spanish>Emisoras</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_PresetsTooltip">
+            <English>Edit your saved personal station list.</English>
+            <German>Deine gespeicherte Senderliste bearbeiten.</German>
+            <Spanish>Editar tu lista personal de emisoras.</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_Retry">
             <English>Try again</English>
             <German>Erneut versuchen</German>
+            <Spanish>Reintentar</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_RetryTooltip">
             <English>Reconnect this radio only for you.</English>
             <German>Dieses Radio nur für dich neu verbinden.</German>
+            <Spanish>Volver a conectar esta radio solo para ti.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_SharedStation">
+            <English>Shared custom station</English>
+            <German>Geteilter eigener Sender</German>
+            <Spanish>Emisora personalizada compartida</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusAllMuted">
             <English>All radios muted for you</English>
             <German>Alle Radios für dich stumm</German>
+            <Spanish>Todas las radios silenciadas para ti</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusDecode">
+            <English>Audio decoding failed</English>
+            <German>Audio konnte nicht dekodiert werden</German>
+            <Spanish>Error al decodificar el audio</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusDefaultDisabled">
+            <English>Default station disabled</English>
+            <German>Standardsender deaktiviert</German>
+            <Spanish>Emisora predeterminada desactivada</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusEnded">
             <English>Stream ended. Try again.</English>
             <German>Stream beendet. Erneut versuchen.</German>
+            <Spanish>La transmisión ha finalizado. Reintenta.</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusError">
             <English>Audio request failed. Try again.</English>
             <German>Audiostart fehlgeschlagen. Erneut versuchen.</German>
+            <Spanish>Error al iniciar el audio. Reintenta.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusHTTP">
+            <English>Stream server returned an error</English>
+            <German>Stream-Server meldet einen Fehler</German>
+            <Spanish>El servidor devolvió un error</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusInterrupted">
+            <English>Stream connection interrupted</English>
+            <German>Stream-Verbindung unterbrochen</German>
+            <Spanish>Conexión interrumpida</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusLoading">
             <English>Connecting / buffering · %1 s</English>
             <German>Verbinden / Laden · %1 s</German>
+            <Spanish>Conectando / cargando · %1 s</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusObjectMuted">
             <English>This radio is muted for you</English>
             <German>Dieses Radio ist für dich stumm</German>
+            <Spanish>Esta radio está silenciada para ti</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusOff">
             <English>Radio off</English>
             <German>Radio ausgeschaltet</German>
+            <Spanish>Radio apagada</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusRedirect">
+            <English>Stream redirect failed</English>
+            <German>Stream-Weiterleitung fehlgeschlagen</German>
+            <Spanish>Error de redirección</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusStarted">
             <English>Playback started</English>
             <German>Wiedergabe gestartet</German>
+            <Spanish>Reproducción iniciada</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusStreamerMuted">
             <English>Muted by Streamer Mode</English>
             <German>Durch Streamer Mode stumm</German>
+            <Spanish>Silenciada por el modo streamer</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusTimeout">
+            <English>Connection timed out</English>
+            <German>Zeitüberschreitung bei der Verbindung</German>
+            <Spanish>Tiempo de conexión agotado</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StatusUnconfirmed">
             <English>No playback confirmation. Try again.</English>
             <German>Keine Wiedergabebestätigung. Erneut versuchen.</German>
+            <Spanish>Reproducción sin confirmar. Reintenta.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusUnreachable">
+            <English>Stream unreachable</English>
+            <German>Stream nicht erreichbar</German>
+            <Spanish>Transmisión no disponible</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StatusUnsupported">
+            <English>Unsupported stream format</English>
+            <German>Stream-Format nicht unterstützt</German>
+            <Spanish>Formato de transmisión no compatible</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_StreamerTooltip">
             <English>Approved No Copyright Stations only. Affects only you.</English>
             <German>Nur freigegebene No Copyright-Sender. Betrifft nur dich.</German>
+            <Spanish>Solo emisoras aprobadas sin copyright. Solo te afecta a ti.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StyleClassic">
+            <English>Classic</English>
+            <German>Klassisch</German>
+            <Spanish>Clásico</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_StyleModern">
+            <English>Modern</English>
+            <German>Modern</German>
+            <Spanish>Moderno</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_TitleCopied">
             <English>Copied to clipboard: %1</English>
             <German>In die Zwischenablage kopiert: %1</German>
+            <Spanish>Copiado al portapapeles: %1</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_TogglePower">
+            <English>Toggle radio power</English>
+            <German>Radio ein-/ausschalten</German>
+            <Spanish>Encender/apagar la radio</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_ToggleStreamer">
             <English>Toggle Streamer Mode</English>
             <German>Streamer Mode umschalten</German>
+            <Spanish>Alternar modo streamer</Spanish>
         </Key>
         <Key ID="STR_Live_Radio_Interface_Unmute">
             <English>Unmute for me</English>
             <German>Stumm aufheben</German>
+            <Spanish>Activar sonido para mí</Spanish>
         </Key>
     </Package>
 </Project>

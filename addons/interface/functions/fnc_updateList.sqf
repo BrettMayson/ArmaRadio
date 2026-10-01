@@ -39,9 +39,9 @@ lbClear _ctrlList;
 _ctrlList lbSetCurSel -1;
 
 {
-    _x params ["_name", "_picture", "_url", "_condition", "_noCopyright"];
+    _x params ["_name", "_picture", "_url", "_condition", "_noCopyright", "_default"];
+    if (_default && {missionNamespace getVariable [QGVAR(hideDefaultStations), false]}) then {continue};
     if (call _condition isEqualTo false) then {continue};
-    if (GVAR(copyrightFreeOnly) && {!_noCopyright}) then {continue};
 
     private _isActive = _url isEqualTo _activeURL;
 
@@ -64,6 +64,14 @@ _ctrlList lbSetCurSel -1;
     };
 } forEach GVAR(stations);
 
+if (_activeURL != "" && {lbCurSel _ctrlList < 0} && {GVAR(stations) findIf {(_x#2) == _activeURL} == -1} && {
+    !(_activeURL in (missionNamespace getVariable [QGVAR(disabledStationURLs), []]))
+}) then {
+    private _name = _object getVariable [QGVAR(activeStationName), localize "STR_Live_Radio_Interface_SharedStation"];
+    private _index = _ctrlList lbAdd _name;
+    _ctrlList setVariable [str _index, [_name, "", _activeURL]];
+    _ctrlList lbSetCurSel _index;
+};
 _ctrlList setVariable [QGVAR(locked), false];
 
 (_display displayCtrl IDC_EMPTY) ctrlShow (lbSize _ctrlList == 0);

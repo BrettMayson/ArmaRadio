@@ -23,6 +23,7 @@ if (_powered) then {
     _key = switch (true) do {
         case (missionNamespace getVariable [QEGVAR(manager,muteAll), false]): {"AllMuted"};
         case (_object getVariable [QEGVAR(manager,locallyMuted), false]): {"ObjectMuted"};
+        case (_url in (missionNamespace getVariable [QGVAR(disabledStationURLs), []])): {"DefaultDisabled"};
         case (!([_url] call EFUNC(manager,canHear))): {"StreamerMuted"};
         default {
             _retry = _elapsed >= 5 || {_state#0 != "loading"};
@@ -36,6 +37,7 @@ if (_powered) then {
     };
 };
 private _text = switch (_key) do {
+    case "DefaultDisabled": {localize "STR_Live_Radio_Interface_StatusDefaultDisabled"};
     case "Off": {localize "STR_Live_Radio_Interface_StatusOff"};
     case "AllMuted": {localize "STR_Live_Radio_Interface_StatusAllMuted"};
     case "ObjectMuted": {localize "STR_Live_Radio_Interface_StatusObjectMuted"};
@@ -48,6 +50,22 @@ private _text = switch (_key) do {
     default {""};
 };
 if (_key == "Loading") then {_text = format [_text, _elapsed]};
+if (_key == "Error") then {
+    private _message = _state param [2, ""];
+    private _category = (_message splitString ":") param [0, ""];
+    private _errorKey = switch (_category) do {
+        case "connect": {"Unreachable"};
+        case "timeout": {"Timeout"};
+        case "redirect": {"Redirect"};
+        case "http": {"HTTP"};
+        case "unsupported": {"Unsupported"};
+        case "decode": {"Decode"};
+        case "read": {"Interrupted"};
+        default {"Error"};
+    };
+    _text = localize ("STR_Live_Radio_Interface_Status" + _errorKey);
+    if (_message != "") then {_text = _text + endl + (_message select [(_message find ":") + 1, 180])};
+};
 private _ctrl = _display displayCtrl IDC_STATUS;
 _ctrl ctrlSetText _text;
 _ctrl ctrlSetTextColor _color;

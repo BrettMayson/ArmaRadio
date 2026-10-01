@@ -25,7 +25,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_interact_menu")) then {
             [cursorTarget] call FUNC(open)
         },
         "", 1, true, true, "",
-        QUOTE(alive cursorTarget && {isNull objectParent player} && {cursorTarget isKindOf ""Land_FMradio_F"" || {cursorTarget isKindOf ""Car""} || {cursorTarget isKindOf ""Air""} || {cursorTarget isKindOf ""Ship""}} && {[cursorTarget] call FUNC(canOpen)}),
+        QUOTE(alive cursorTarget && {isNull objectParent player} && {[cursorTarget] call FUNC(isSupported)} && {[cursorTarget] call FUNC(canOpen)}),
         5
     ]] call CBA_fnc_addPlayerAction;
     [[
@@ -34,7 +34,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_interact_menu")) then {
             [vehicle (call CBA_fnc_currentUnit)] call FUNC(open)
         },
         "", 1, true, true, "",
-        QUOTE((vehicle player isKindOf ""Car"" || {vehicle player isKindOf ""Air""} || {vehicle player isKindOf ""Ship""}) && {alive vehicle player} && {[vehicle player] call FUNC(canOpen)}),
+        QUOTE(([vehicle player] call FUNC(isSupported)) && {alive vehicle player} && {[vehicle player] call FUNC(canOpen)}),
         5
     ]] call CBA_fnc_addPlayerAction;
 };
@@ -62,9 +62,10 @@ if (isClass (configFile >> "CfgPatches" >> "ace_interact_menu")) then {
 }] call CBA_fnc_addEventHandler;
 
 [QEGVAR(manager,albumArtUpdated), {
-    [uiNamespace getVariable QGVAR(display)] call FUNC(updateInfo);
-}] call CBA_fnc_addEventHandler;
-
-[QEGVAR(manager,albumArtUpdated), {
     [uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(updateInfo);
 }] call CBA_fnc_addEventHandler;
+
+[QGVAR(radioEnabled), {call FUNC(registerRadio)}] call CBA_fnc_addEventHandler;
+{
+    if (_x getVariable [QGVAR(enabled), false]) then {[_x] call FUNC(registerRadio)};
+} forEach allMissionObjects "";

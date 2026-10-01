@@ -13,4 +13,18 @@ class CfgVehicles {
             };
         };
     };
+    class Module_F;
+    class GVAR(moduleRadio): Module_F {
+        scope = 2;
+        scopeCurator = 2;
+        displayName = CSTRING(ModuleRadio);
+        category = QGVAR(modules);
+        function = QFUNC(moduleRadio);
+        isGlobal = 1;
+        isTriggerActivated = 0;
+        isDisposable = 1;
+        curatorCanAttach = 1;
+        curatorInfoType = "";
+        author = "Joncantplay";
+    };
 };

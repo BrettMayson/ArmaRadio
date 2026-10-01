@@ -4,6 +4,7 @@
 params [["_url", "", [""]]];
 
 if (_url == "") exitWith {false};
+if (_url in (missionNamespace getVariable [QEGVAR(interface,disabledStationURLs), []])) exitWith {false};
 if !(missionNamespace getVariable [QGVAR(streamerMode), false]) exitWith {true};
 
 GVAR(stationPolicy) getOrDefault [_url, false]

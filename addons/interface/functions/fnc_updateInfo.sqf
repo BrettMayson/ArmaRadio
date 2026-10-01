@@ -24,6 +24,7 @@ private _object = _display getVariable QGVAR(object);
 private _ctrlList = _display displayCtrl IDC_LIST;
 (_ctrlList getVariable [str lbCurSel _ctrlList, ["", ""]]) params ["_name", "_picture"];
 
+if (_name == "") then {_name = _object getVariable [QGVAR(activeStationName), ""]};
 private _ctrlName = _display displayCtrl IDC_NAME;
 _ctrlName ctrlSetText _name;
 _ctrlName ctrlSetTooltip _name;

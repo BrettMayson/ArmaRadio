@@ -49,3 +49,5 @@
 #define ICON_VOLUME_LOW QPATHTOF(ui\volume_low_ca.paa)
 #define ICON_VOLUME_MEDIUM QPATHTOF(ui\volume_medium_ca.paa)
 #define ICON_VOLUME_HIGH QPATHTOF(ui\volume_high_ca.paa)
+
+#define IDC_PRESETS 290

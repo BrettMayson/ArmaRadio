@@ -19,7 +19,10 @@
 params ["_object"];
 if !([_object] call FUNC(canOpen)) exitWith {};
 
-if (!createDialog QGVAR(display)) exitWith {};
+private _dialog = [QGVAR(display), QGVAR(displayClassic)] select (
+    missionNamespace getVariable [QGVAR(interfaceStyle), 0] == 1
+);
+if (!createDialog _dialog) exitWith {};
 
 private _display = uiNamespace getVariable QGVAR(display);
 _display setVariable [QGVAR(object), _object];
@@ -61,7 +64,7 @@ private _volume = _object getVariable [QEGVAR(manager,volume), DEFAULT_VOLUME];
 private _ctrlStreamer = _display displayCtrl IDC_STREAMER_TOGGLE;
 _ctrlStreamer ctrlAddEventHandler ["ButtonClick", {call FUNC(handleStreamer)}];
 private _ctrlCopyTitle = _display displayCtrl IDC_COPY_TITLE;
-_ctrlCopyTitle ctrlAddEventHandler ["ButtonClick", {call FUNC(handleCopyTitle)}];
+_ctrlCopyTitle ctrlAddEventHandler ["MouseButtonClick", {call FUNC(handleCopyTitle)}];
 (_display displayCtrl IDC_MUTE) ctrlAddEventHandler ["ButtonClick", {call FUNC(handleMute)}];
 (_display displayCtrl IDC_RETRY) ctrlAddEventHandler ["ButtonClick", {
     params ["_control"];
@@ -70,3 +73,5 @@ _ctrlCopyTitle ctrlAddEventHandler ["ButtonClick", {call FUNC(handleCopyTitle)}]
 }];
 [_display] call FUNC(updateStreamer);
 [_display] call FUNC(updateStatus);
+
+(_display displayCtrl IDC_PRESETS) ctrlAddEventHandler ["ButtonClick", {call FUNC(openPresets)}];

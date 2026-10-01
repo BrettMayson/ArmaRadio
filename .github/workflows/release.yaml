@@ -2,73 +2,137 @@ name: Release
 
 on:
   release:
-    types:
-      - published
+    types: [published]
+
+permissions:
+  contents: write
 
 jobs:
   build_extension:
-    strategy:
-      matrix:
-        arrays:
-          [
-            os: { tag: "windows-latest", target: "i686-pc-windows-msvc" },
-            os: { tag: "windows-latest", target: "x86_64-pc-windows-msvc" },
-          ]
-    runs-on: ${{ matrix.arrays.os.tag }}
+    runs-on: windows-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Install latest
-        uses: actions-rs/toolchain@v1
+        uses: actions/checkout@v6
+      - name: Set up Microsoft build tools
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          target: ${{ matrix.arrays.os.target }}
-          toolchain: stable
-          default: true
-      - name: Cargo Build
-        run: cargo build --release
-      - name: Upload
+          arch: amd64
+      - name: Install NASM
+        shell: pwsh
+        run: |
+          choco install nasm --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          'C:\Program Files\NASM' | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Set up MSYS2 for the minimal codec build
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          path-type: inherit
+          update: false
+          install: make curl diffutils
+      - name: Build AAC+ and HLS decoder with MSVC
+        shell: msys2 {0}
+        run: bash tools/build-codecs.sh
+      - name: Test modern stream formats
+        shell: pwsh
+        run: |
+          python tools/test-codecs.py resources/codecs/ffmpeg.exe --fetch-he
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install Rust
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          rustup target add --toolchain 1.98.1 x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test AAC decoder
+        shell: pwsh
+        run: |
+          cargo +1.98.1 test --locked --target x86_64-pc-windows-msvc --lib streams::aac::tests::decodes_adts_without_seeking
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test the modern decoder integration
+        shell: pwsh
+        run: |
+          cargo +1.98.1 test --locked --target x86_64-pc-windows-msvc --lib streams::ffmpeg::tests::decodes_http_audio
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build Windows extension
+        shell: pwsh
+        run: |
+          cargo +1.98.1 build --release --locked --target x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force output | Out-Null
+          Copy-Item 'target/x86_64-pc-windows-msvc/release/live_radio.dll' 'output/live_radio_x64.dll'
+          Get-FileHash 'output/live_radio_x64.dll', 'output/codec/ffmpeg.exe' -Algorithm SHA256 | Format-List
+      - name: Package FFmpeg source distribution
+        shell: pwsh
+        run: Compress-Archive -Path 'output/ffmpeg-source/*' -DestinationPath 'output/live_radio-ffmpeg-source.zip' -Force
+      - name: Upload extension
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.arrays.os.target }}
-          path: target/release/live_radio.dll
+          name: x86_64-pc-windows-msvc
+          path: output/live_radio_x64.dll
           if-no-files-found: error
           retention-days: 30
+      - name: Upload FFmpeg source distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-source
+          path: output/live_radio-ffmpeg-source.zip
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload decoder for testing and BattlEye submission
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-decoder
+          path: output/codec/ffmpeg.exe
+          if-no-files-found: error
+          retention-days: 30
+
   package:
     needs: build_extension
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/download-artifact@v4
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+      - name: Download extension
+        uses: actions/download-artifact@v4
         with:
           name: x86_64-pc-windows-msvc
-      - run: mv live_radio.dll live_radio_x64.dll
-      - uses: actions/download-artifact@v4
-        with:
-          name: i686-pc-windows-msvc
-
+      - name: Remove legacy 32-bit extension
+        run: rm -f live_radio.dll
       - name: Setup HEMTT
         uses: arma-actions/hemtt@v1
       - name: Build
         run: hemtt release
-      - uses: actions/upload-artifact@v4
+      - name: Upload mod
+        uses: actions/upload-artifact@v4
         with:
           name: live_radio.zip
-          path: "releases/live_radio-latest.zip"
-      # Upload to GitHub
-      - uses: softprops/action-gh-release@v1
+          path: releases/live_radio-latest.zip
+          if-no-files-found: error
+          retention-days: 30
+      - name: Download FFmpeg source distribution
+        uses: actions/download-artifact@v4
+        with:
+          name: ffmpeg-source
+          path: release-support
+      - name: Attach mod and separate FFmpeg sources to release
+        uses: softprops/action-gh-release@v2
         id: gh_release
         with:
-          files: "releases/live_radio-latest.zip"
+          files: |
+            releases/live_radio-latest.zip
+            release-support/live_radio-ffmpeg-source.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Upload to Steam Workshop
-      - run: unzip releases/live_radio-latest.zip -d ./unzipped
-      - uses: arma-actions/workshop-upload@v1
+      - name: Extract mod
+        run: unzip releases/live_radio-latest.zip -d ./unzipped
+      - name: Upload to Steam Workshop
+        uses: arma-actions/workshop-upload@v1
         with:
-          itemId: "2172022102" # Id of item to update
+          itemId: "2172022102"
           contentPath: "unzipped/@live_radio"
-          changelog: #{{ steps.gh_release.outputs.url }}
+          changelog: ${{ steps.gh_release.outputs.url }}
         env:
           STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
           STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}

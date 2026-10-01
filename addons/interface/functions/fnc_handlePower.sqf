@@ -37,7 +37,8 @@ if (_toggle) then {
 
     _powered = _url != "";
     private _object = _display getVariable QGVAR(object);
-    [_object, _url] call EFUNC(manager,play);
+    private _name = ((_display displayCtrl IDC_LIST) getVariable [str lbCurSel (_display displayCtrl IDC_LIST), []]) param [0, ""];
+    [_object, _url, _name] call FUNC(playStation);
 
     _display setVariable [QGVAR(powered), _powered];
 };

@@ -35,5 +35,6 @@ private _display = ctrlParent _ctrlList;
 if (_display getVariable QGVAR(powered)) then {
     private _url = (_ctrlList getVariable str _index) param [2, ""];
     private _object = _display getVariable QGVAR(object);
-    [_object, _url] call EFUNC(manager,play);
+    private _name = ((_display displayCtrl IDC_LIST) getVariable [str lbCurSel (_display displayCtrl IDC_LIST), []]) param [0, ""];
+    [_object, _url, _name] call FUNC(playStation);
 };

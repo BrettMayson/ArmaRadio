@@ -1,8 +1,6 @@
 #include "script_component.hpp"
 // Author: Joncantplay
-params ["_control"];
-EGVAR(manager,streamerMode) = !(missionNamespace getVariable [QEGVAR(manager,streamerMode), false]);
-profileNamespace setVariable [QEGVAR(manager,streamerMode), EGVAR(manager,streamerMode)];
-saveProfileNamespace;
-call EFUNC(manager,refreshPlayback);
-[QEGVAR(manager,streamerModeChanged), []] call CBA_fnc_localEvent;
+
+// Read and persist the same client setting used by CBA Addon Options.
+private _enabled = !([QEGVAR(manager,streamerMode), "client"] call CBA_settings_fnc_get);
+[QEGVAR(manager,streamerMode), _enabled, 0, "client", true] call CBA_settings_fnc_set;
