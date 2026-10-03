@@ -4,7 +4,14 @@ use std::{
 };
 
 use crossbeam_channel::{Receiver, Sender};
-use simplemad::Decoder;
+use symphonia::core::{
+    audio::SampleBuffer,
+    codecs::DecoderOptions,
+    formats::FormatOptions,
+    io::{MediaSourceStream, MediaSourceStreamOptions},
+    meta::MetadataOptions,
+    probe::Hint,
+};
 
 use self::read::RemoteStream;
 
@@ -39,53 +46,107 @@ impl Stream {
                 );
                 return;
             };
-            let Ok(decoder) = Decoder::decode(remote) else {
-                error!("Failed to start stream: {url}");
+
+            let mut hint = Hint::new();
+            if let Some(content_type) = remote.content_type() {
+                let content_type = content_type.to_lowercase();
+                if content_type.contains("aac") {
+                    hint.with_extension("aac");
+                } else if content_type.contains("mpeg") || content_type.contains("mp3") {
+                    hint.with_extension("mp3");
+                }
+            }
+
+            let mss = MediaSourceStream::new(Box::new(remote), MediaSourceStreamOptions::default());
+            let probed = symphonia::default::get_probe().format(
+                &hint,
+                mss,
+                &FormatOptions::default(),
+                &MetadataOptions::default(),
+            );
+            let Ok(mut probed) = probed else {
+                error!("Failed to probe stream: {url}");
                 for sender in senders.0.read().expect("not poisoned").iter() {
                     let _ = sender.send(StreamPacket::Close);
                 }
                 return;
             };
-            for decoding_result in decoder {
+
+            let Some(track) = probed.format.default_track().cloned() else {
+                error!("Failed to find a track in stream: {url}");
+                for sender in senders.0.read().expect("not poisoned").iter() {
+                    let _ = sender.send(StreamPacket::Close);
+                }
+                return;
+            };
+            let track_id = track.id;
+
+            let Ok(mut decoder) =
+                symphonia::default::get_codecs().make(&track.codec_params, &DecoderOptions::default())
+            else {
+                error!("Failed to create decoder for stream: {url}");
+                for sender in senders.0.read().expect("not poisoned").iter() {
+                    let _ = sender.send(StreamPacket::Close);
+                }
+                return;
+            };
+
+            let mut sample_buf: Option<SampleBuffer<f32>> = None;
+
+            loop {
                 if count.load(std::sync::atomic::Ordering::Relaxed) == 0 {
                     debug!("no listeners, shutting down stream");
                     break;
                 }
-                match decoding_result {
-                    Err(_) => {} // error!("Error: {:?}", e),
-                    Ok(frame) => {
-                        let mut samples: Vec<alto::Mono<f32>> = Vec::new();
-                        for i in 0..frame.samples[0].len() {
-                            samples.push(alto::Mono {
-                                center: f32::midpoint(
-                                    frame.samples[0][i].to_f32(),
-                                    frame.samples[1][i].to_f32(),
-                                ),
-                            });
-                        }
-                        let mut delete = false;
-                        for sender in senders.0.read().expect("not poisoned").iter() {
-                            if let Err(e) = sender.send(StreamPacket::Data(
-                                samples.clone(),
-                                frame.sample_rate.cast_signed(),
-                            )) {
-                                error!("Failed to send data: {e}");
-                                delete = true;
-                            }
-                        }
-                        if delete {
-                            senders
-                                .0
-                                .write()
-                                .expect("not poisoned")
-                                .retain(|s| s.send(StreamPacket::Check).is_ok());
-                        }
+                let Ok(packet) = probed.format.next_packet() else {
+                    break;
+                };
+                if packet.track_id() != track_id {
+                    continue;
+                }
+                let Ok(buffer) = decoder.decode(&packet) else {
+                    continue; // error!("Error: {:?}", e),
+                };
+
+                let spec = *buffer.spec();
+                let channels = spec.channels.count();
+                let buf = sample_buf
+                    .get_or_insert_with(|| SampleBuffer::new(buffer.capacity() as u64, spec));
+                buf.copy_interleaved_ref(buffer);
+                let interleaved = buf.samples();
+
+                let mut samples: Vec<alto::Mono<f32>> = Vec::new();
+                for frame in interleaved.chunks(channels) {
+                    let center = if channels >= 2 {
+                        f32::midpoint(frame[0], frame[1])
+                    } else {
+                        frame[0]
+                    };
+                    samples.push(alto::Mono { center });
+                }
+
+                let mut delete = false;
+                for sender in senders.0.read().expect("not poisoned").iter() {
+                    if let Err(e) = sender.send(StreamPacket::Data(
+                        samples.clone(),
+                        spec.rate.cast_signed(),
+                    )) {
+                        error!("Failed to send data: {e}");
+                        delete = true;
                     }
+                }
+                if delete {
+                    senders
+                        .0
+                        .write()
+                        .expect("not poisoned")
+                        .retain(|s| s.send(StreamPacket::Check).is_ok());
                 }
             }
         });
     }
 }
+
 
 pub enum StreamPacket {
     Data(Vec<alto::Mono<f32>>, i32),
@@ -178,6 +239,15 @@ mod tests {
     fn classic_rock() {
         let receiver =
             super::Streams::listen("http://listen.classicrock109.com:10042".to_string());
+        std::thread::sleep(std::time::Duration::from_secs(3));
+        drop(receiver);
+        std::thread::sleep(std::time::Duration::from_secs(3));
+    }
+
+    #[test]
+    fn aac() {
+        let receiver = 
+            super::Streams::listen("http://hirschmilch.de:7000/stream/5/".to_string());
         std::thread::sleep(std::time::Duration::from_secs(3));
         drop(receiver);
         std::thread::sleep(std::time::Duration::from_secs(3));

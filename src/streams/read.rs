@@ -1,7 +1,8 @@
-use std::io::{BufReader, Read};
+use std::io::{BufReader, Read, Seek, SeekFrom};
 
 use regex::Regex;
 use reqwest::blocking::{Client, Response};
+use symphonia::core::io::MediaSource;
 
 use crate::album::search_album;
 
@@ -14,6 +15,7 @@ pub struct RemoteStream {
     regex: Regex,
     senders: Senders,
     last_track: Option<String>,
+    content_type: Option<String>,
 }
 
 impl RemoteStream {
@@ -23,6 +25,11 @@ impl RemoteStream {
             .header("Icy-MetaData", "1")
             .send()
             .map_err(|e| e.to_string())?;
+        let content_type = response
+            .headers()
+            .get("content-type")
+            .and_then(|i| i.to_str().ok())
+            .map(ToString::to_string);
         Ok(Self {
             interval: response
                 .headers()
@@ -34,9 +41,34 @@ impl RemoteStream {
             regex: Regex::new("(?m)StreamTitle='(.+?)';").map_err(|e| e.to_string())?,
             senders,
             last_track: None,
+            content_type,
         })
     }
+
+    pub fn content_type(&self) -> Option<&str> {
+        self.content_type.as_deref()
+    }
 }
+
+impl Seek for RemoteStream {
+    fn seek(&mut self, _pos: SeekFrom) -> std::io::Result<u64> {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "seeking is not supported on a live stream",
+        ))
+    }
+}
+
+impl MediaSource for RemoteStream {
+    fn is_seekable(&self) -> bool {
+        false
+    }
+
+    fn byte_len(&self) -> Option<u64> {
+        None
+    }
+}
+
 
 impl Read for RemoteStream {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
@@ -63,6 +95,7 @@ impl Read for RemoteStream {
                     if self.last_track != Some(cap[1].to_string()) {
                         for sender in self.senders.0.read().expect("not poisoned").iter() {
                             let _ = sender.send(StreamPacket::Title(cap[1].to_string()));
+                            println!("New track: {}", &cap[1]);
                         }
                         self.last_track = Some(cap[1].to_string());
                         let track = cap[1].to_string();

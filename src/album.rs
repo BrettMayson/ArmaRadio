@@ -25,6 +25,7 @@ pub fn search_album(track: &str) -> Option<String> {
     let tmp_dir = dirs::cache_dir().expect("Failed to get cache dir").join("live_radio");
     let tmp_file_path = tmp_dir.join(format!("{track_id}.jpg"));
     if !tmp_file_path.exists() {
+        std::fs::create_dir_all(&tmp_dir).expect("Failed to create cache dir");
         let mut tmp_file = std::fs::File::create(&tmp_file_path).expect("Failed to create temp file");
         let mut response = reqwest::blocking::get(&url).expect("Failed to download image");
         std::io::copy(&mut response, &mut tmp_file).expect("Failed to write to temp file");
