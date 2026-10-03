@@ -8,14 +8,25 @@ use symphonia::core::{
     audio::SampleBuffer,
     codecs::DecoderOptions,
     formats::FormatOptions,
-    io::{MediaSourceStream, MediaSourceStreamOptions},
+    io::{MediaSource, MediaSourceStream, MediaSourceStreamOptions},
     meta::MetadataOptions,
     probe::Hint,
 };
 
+use self::hls::HlsSource;
 use self::read::RemoteStream;
 
+mod hls;
 mod read;
+
+/// HLS streams are served as `.m3u8` playlists rather than a single continuous byte stream.
+fn is_hls_url(url: &str) -> bool {
+    url.split(['?', '#'])
+        .next()
+        .unwrap_or(url)
+        .to_lowercase()
+        .ends_with(".m3u8")
+}
 
 #[derive(Clone)]
 pub struct Senders(pub Arc<RwLock<Vec<Sender<StreamPacket>>>>);
@@ -38,26 +49,43 @@ impl Stream {
         let url = url.to_string();
         let senders = self.senders.clone();
         std::thread::spawn(move || {
-            let remote = RemoteStream::new(&url, senders.clone());
-            let Ok(remote) = remote else {
-                error!(
-                    "Failed to start stream: {}",
-                    remote.err().expect("error expected")
-                );
-                return;
+            let (source, hint): (Box<dyn MediaSource>, Hint) = if is_hls_url(&url) {
+                match HlsSource::new(&url) {
+                    Ok(hls) => {
+                        let hint = hls.hint();
+                        (Box::new(hls), hint)
+                    }
+                    Err(e) => {
+                        error!("Failed to start HLS stream: {e}");
+                        for sender in senders.0.read().expect("not poisoned").iter() {
+                            let _ = sender.send(StreamPacket::Close);
+                        }
+                        return;
+                    }
+                }
+            } else {
+                let remote = RemoteStream::new(&url, senders.clone());
+                let Ok(remote) = remote else {
+                    error!(
+                        "Failed to start stream: {}",
+                        remote.err().expect("error expected")
+                    );
+                    return;
+                };
+
+                let mut hint = Hint::new();
+                if let Some(content_type) = remote.content_type() {
+                    let content_type = content_type.to_lowercase();
+                    if content_type.contains("aac") {
+                        hint.with_extension("aac");
+                    } else if content_type.contains("mpeg") || content_type.contains("mp3") {
+                        hint.with_extension("mp3");
+                    }
+                }
+                (Box::new(remote), hint)
             };
 
-            let mut hint = Hint::new();
-            if let Some(content_type) = remote.content_type() {
-                let content_type = content_type.to_lowercase();
-                if content_type.contains("aac") {
-                    hint.with_extension("aac");
-                } else if content_type.contains("mpeg") || content_type.contains("mp3") {
-                    hint.with_extension("mp3");
-                }
-            }
-
-            let mss = MediaSourceStream::new(Box::new(remote), MediaSourceStreamOptions::default());
+            let mss = MediaSourceStream::new(source, MediaSourceStreamOptions::default());
             let probed = symphonia::default::get_probe().format(
                 &hint,
                 mss,
@@ -248,6 +276,15 @@ mod tests {
     fn aac() {
         let receiver = 
             super::Streams::listen("http://hirschmilch.de:7000/stream/5/".to_string());
+        std::thread::sleep(std::time::Duration::from_secs(3));
+        drop(receiver);
+        std::thread::sleep(std::time::Duration::from_secs(3));
+    }
+
+    #[test]
+    fn hls() {
+        let receiver =
+            super::Streams::listen("http://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8".to_string());
         std::thread::sleep(std::time::Duration::from_secs(3));
         drop(receiver);
         std::thread::sleep(std::time::Duration::from_secs(3));

@@ -35,10 +35,12 @@ lbClear _ctrlList;
 _ctrlList lbSetCurSel -1;
 
 {
-    _x params ["_name", "_picture", "_url", "_condition", "_noCopyright"];
+    _x params ["_name", "_picture", "_url", "_condition", "_noCopyright", "_settingName", "_groupSetting"];
 
     if (call _condition isEqualTo false) then { continue };
     if (GVAR(copyrightFreeOnly) && {!_noCopyright}) then { continue };
+    if (!(missionNamespace getVariable [_settingName, true])) then { continue };
+    if (_groupSetting != "" && {!(missionNamespace getVariable [_groupSetting, true])}) then { continue };
 
     private _isActive = _url isEqualTo _activeURL;
 
