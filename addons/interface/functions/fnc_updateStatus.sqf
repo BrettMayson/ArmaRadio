@@ -26,7 +26,7 @@ if (_powered) then {
         case (_url in (missionNamespace getVariable [QGVAR(disabledStationURLs), []])): {"DefaultDisabled"};
         case (!([_url] call EFUNC(manager,canHear))): {"StreamerMuted"};
         default {
-            _retry = _elapsed >= 5 || {_state#0 != "loading"};
+            _retry = _elapsed >= 3 || {_state#0 != "loading"};
             switch (_state#0) do {
                 case "started": {_color = [0.3,0.85,0.8,1]; "Started"};
                 case "error": {_color = [1,0.55,0.5,1]; "Error"};

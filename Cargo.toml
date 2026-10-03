@@ -41,3 +41,7 @@ urlencoding = "2.1.3"
 codegen-units = 1
 lto = "thin"
 strip = "symbols"
+
+# Fix short-read handling while retaining the existing libmad decoder.
+[patch.crates-io]
+simplemad = { path = "vendor/simplemad" }

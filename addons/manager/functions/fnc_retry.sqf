@@ -6,10 +6,7 @@ if (count _active < 2) exitWith {};
 _active params ["_id", "_url"];
 if ([_source] call FUNC(isMuted) || {!([_url] call FUNC(canHear))}) exitWith {};
 private _status = GVAR(status) getOrDefault [_id, ["", -10]];
-if (_status#0 == "loading" && {diag_tickTime - (_status#1) < 5}) exitWith {};
-if (GVAR(playingSources) getOrDefault [_id, false]) then {
-    EXT callExtension ["source:destroy", [_id]];
-    GVAR(playingSources) deleteAt _id;
-};
+if (_status#0 == "loading" && {diag_tickTime - (_status#1) < 10}) exitWith {};
+[_id] call FUNC(destroyLocal);
 GVAR(sourcesTitles) deleteAt _id;
 [_id] call FUNC(syncPlayback);

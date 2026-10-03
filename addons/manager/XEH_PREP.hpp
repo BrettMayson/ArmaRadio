@@ -13,3 +13,6 @@ PREP(stopEntity);
 PREP(volume);
 PREP(isCopyrightSafe);
 PREP(refreshStreamerMode);
+
+PREP(destroyLocal);
+PREP(autoRetry);

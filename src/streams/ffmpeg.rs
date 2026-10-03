@@ -4,7 +4,7 @@ use std::{
     io::{BufRead, BufReader, Read},
     path::PathBuf,
     process::{Command, Stdio},
-    sync::{atomic::{AtomicBool, AtomicU8, Ordering}, Arc, Mutex, OnceLock},
+    sync::{atomic::{AtomicBool, AtomicUsize, Ordering}, Arc, Mutex, OnceLock},
     time::Duration,
 };
 
@@ -53,14 +53,14 @@ fn classify(message: &str) -> String {
     format!("{category}: {}", message.chars().take(400).collect::<String>())
 }
 
-pub fn decode(url: &str, count: &Arc<AtomicU8>, senders: &Senders) -> Result<(), String> {
+pub fn decode(url: &str, count: &Arc<AtomicUsize>, senders: &Senders) -> Result<(), String> {
     if !(url.starts_with("http://") || url.starts_with("https://")) {
         return Err("unsupported: A direct HTTP(S) stream URL is required".to_string());
     }
     let mut command = Command::new(executable()?);
     command.args([
         "-hide_banner", "-nostdin", "-loglevel", "info",
-        "-rw_timeout", "15000000", "-protocol_whitelist", "http,https,tcp,tls,crypto",
+        "-rw_timeout", "10000000", "-protocol_whitelist", "http,https,tcp,tls,crypto",
         "-re", "-i", url, "-map", "0:a:0", "-vn", "-sn", "-dn",
         "-ac", "1", "-ar", "48000", "-acodec", "pcm_f32le", "-f", "f32le", "pipe:1",
     ]).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
@@ -163,7 +163,7 @@ pub fn decode(url: &str, count: &Arc<AtomicU8>, senders: &Senders) -> Result<(),
 
 #[cfg(test)]
 mod tests {
-    use std::{io::{Read, Write}, net::TcpListener, sync::{atomic::AtomicU8, Arc, RwLock}};
+    use std::{io::{Read, Write}, net::TcpListener, sync::{atomic::AtomicUsize, Arc, RwLock}};
     use crossbeam_channel::unbounded;
     use super::{decode, Senders, StreamPacket};
 
@@ -182,7 +182,7 @@ mod tests {
         });
         let (tx, rx) = unbounded();
         let senders = Senders(Arc::new(RwLock::new(vec![tx])));
-        let count = Arc::new(AtomicU8::new(1));
+        let count = Arc::new(AtomicUsize::new(1));
         let result = decode(&url, &count, &senders);
         // A decoder failure must fail the test before waiting for the server.
         result.unwrap();

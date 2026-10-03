@@ -45,15 +45,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           rustup target add --toolchain 1.98.1 x86_64-pc-windows-msvc
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Test AAC decoder
+      - name: Clean build and streaming regression tests
         shell: pwsh
         run: |
-          cargo +1.98.1 test --locked --target x86_64-pc-windows-msvc --lib streams::aac::tests::decodes_adts_without_seeking
+          cargo +1.98.1 clean
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Test the modern decoder integration
-        shell: pwsh
-        run: |
-          cargo +1.98.1 test --locked --target x86_64-pc-windows-msvc --lib streams::ffmpeg::tests::decodes_http_audio
+          cargo +1.98.1 test --locked --target x86_64-pc-windows-msvc --lib
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build Windows extension
         shell: pwsh

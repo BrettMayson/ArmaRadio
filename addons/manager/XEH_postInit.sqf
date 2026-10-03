@@ -6,7 +6,7 @@ if (hasInterface) then {
         // Be idempotent if an event and the JIP scan discover the same radio.
         if ((GVAR(sourceURLs) getOrDefault [_id, ""]) != _url) then {
             if (GVAR(playingSources) getOrDefault [_id, false]) then {
-                EXT callExtension ["source:destroy", [_id]];
+                [_id] call FUNC(destroyLocal);
                 GVAR(playingSources) deleteAt _id;
             };
             GVAR(sourcesTitles) deleteAt _id;
@@ -20,16 +20,15 @@ if (hasInterface) then {
 
     [QGVAR(stop), {
         params ["_id"];
-        if (GVAR(playingSources) getOrDefault [_id, false]) then {
-            EXT callExtension ["source:destroy", [_id]];
-        };
-        GVAR(playingSources) deleteAt _id;
+        [_id] call FUNC(destroyLocal);
+        GVAR(attemptVehicle) deleteAt _id;
+        GVAR(failureLog) deleteAt _id;
         GVAR(sources) deleteAt _id;
         GVAR(status) deleteAt _id;
         GVAR(sourceURLs) deleteAt _id;
         GVAR(sourceVolumes) deleteAt _id;
         GVAR(sourcesTitles) deleteAt _id;
-            GVAR(sourcesAlbumArt) deleteAt _id;
+        GVAR(sourcesAlbumArt) deleteAt _id;
     }] call CBA_fnc_addEventHandler;
 
     [QGVAR(volume), {
@@ -39,10 +38,11 @@ if (hasInterface) then {
             GVAR(sourceVolumes) set [_id, _gain];
         };
         if (GVAR(playingSources) getOrDefault [_id, false]) then {
-            EXT callExtension ["source:gain", [_id, _gain]];
+            EXT callExtension ["source:gain", [GVAR(nativeIDs) get _id, _gain]];
         };
     }] call CBA_fnc_addEventHandler;
 
+    [FUNC(autoRetry), 0.25] call CBA_fnc_addPerFrameHandler;
     [FUNC(tick), 0.05] call CBA_fnc_addPerFrameHandler;
     [FUNC(heartbeat), 0.75] call CBA_fnc_addPerFrameHandler;
 
@@ -68,25 +68,40 @@ addMissionEventHandler ["ExtensionCallback", {
         private _entry = parseSimpleArray _data;
         private _level = toUpper (_entry param [0, "", [""]]);
         private _message = _entry param [1, "", [""]];
-        [toLower _function, _level, _message] call FUNC(observeLog);
+        // Playback state uses generation-scoped callbacks, never log parsing.
         if (!([toLower _function, _level, _message] call FUNC(shouldLog))) exitWith {};
         LOG_SYS(_function,_data);
     };
     if ((toLower _name) isNotEqualTo "live_radio") exitWith {};
+    private _packet = parseSimpleArray _data;
+    private _native = _packet param [0, ""];
+    private _sharedID = GVAR(attemptSources) getOrDefault [_native, ""];
+    if (_sharedID == "" || {(GVAR(nativeIDs) getOrDefault [_sharedID, ""]) != _native}) exitWith {};
+    _packet set [0, _sharedID];
     switch (_function) do {
+        case "state": {
+            _packet params ["_id", "_state"];
+            if (_state == "started") then {GVAR(autoAttempts) deleteAt _id};
+            if (_state == "started" || {((GVAR(status) getOrDefault [_id, [""]])#0) != "error"}) then {
+                GVAR(status) set [_id, [_state, diag_tickTime]];
+            };
+            GVAR(retryDue) deleteAt _id;
+        };
         case "error": {
-            (parseSimpleArray _data) params ["_id", "_message"];
+            _packet params ["_id", "_message"];
             if (GVAR(playingSources) getOrDefault [_id, false]) then {
                 private _previous = GVAR(status) getOrDefault [_id, []];
                 if ((_previous param [0, ""]) == "error" && {(_previous param [2, ""]) != ""}) exitWith {};
-                if ((_previous param [2, ""]) != _message) then {
+                private _logged = GVAR(failureLog) getOrDefault [_id, ["", -30]];
+                if (GVAR(debugMessages) || {(_logged#0) != _message} || {diag_tickTime - (_logged#1) >= 30}) then {
                     diag_log format ["[LIVE_RADIO] Stream %1 failed: %2", _id, _message];
+                    GVAR(failureLog) set [_id, [_message, diag_tickTime]];
                 };
                 GVAR(status) set [_id, ["error", diag_tickTime, _message select [0, 512]]];
             };
         };
         case "album_art": {
-            (parseSimpleArray _data) params ["_id", "_path"];
+            _packet params ["_id", "_path"];
             if (GVAR(playingSources) getOrDefault [_id, false]) then {
                 GVAR(sourcesAlbumArt) set [_id, _path];
                 [QGVAR(albumArtUpdated), [_id, _path]] call CBA_fnc_localEvent;
@@ -94,7 +109,7 @@ addMissionEventHandler ["ExtensionCallback", {
         };
 
         case "title": {
-            (parseSimpleArray _data) params ["_id", "_title"];
+            _packet params ["_id", "_title"];
             // Ignore callbacks still queued by a source that has been blocked/stopped.
             if (GVAR(playingSources) getOrDefault [_id, false]) then {
                 private _previousTitle = GVAR(sourcesTitles) getOrDefault [_id, ""];

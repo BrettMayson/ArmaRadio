@@ -41,5 +41,13 @@
             <German>Lautstärkemultiplikator</German>
             <Spanish>Multiplicador de volumen</Spanish>
         </Key>
+        <Key ID="STR_Live_Radio_Manager_AutoRetry">
+            <English>Auto-retry streams</English>
+            <German>Streams automatisch erneut versuchen</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_AutoRetryTooltip">
+            <English>Reconnect after errors or interrupted audio. Retry after 2 seconds; initial buffering is allowed up to 10 seconds. Only affects you.</English>
+            <German>Nach Fehlern oder Abbrüchen automatisch neu verbinden. Retry nach 2 Sekunden; für den ersten Audiostart bleiben bis zu 10 Sekunden. Betrifft nur dich.</German>
+        </Key>
     </Package>
 </Project>

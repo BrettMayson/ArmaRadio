@@ -1,6 +1,6 @@
 // Author: Joncantplay
 use std::sync::{
-    atomic::{AtomicU8, Ordering},
+    atomic::{AtomicUsize, Ordering},
     Arc,
 };
 
@@ -14,19 +14,11 @@ use symphonia::core::{
     probe::Hint,
 };
 
-use super::{read::RemoteStream, Senders};
-
-pub fn decode(
-    remote: RemoteStream,
-    count: &Arc<AtomicU8>,
-    senders: &Senders,
-) -> Result<(), String> {
-    decode_media(Box::new(remote), count, senders)
-}
+use super::Senders;
 
 fn decode_media(
     media: Box<dyn MediaSource>,
-    count: &Arc<AtomicU8>,
+    count: &Arc<AtomicUsize>,
     senders: &Senders,
 ) -> Result<(), String> {
     let source = MediaSourceStream::new(media, Default::default());
@@ -98,7 +90,7 @@ fn decode_media(
 mod tests {
     use std::{
         io::{Cursor, Read, Seek, SeekFrom},
-        sync::{atomic::AtomicU8, Arc, RwLock},
+        sync::{atomic::AtomicUsize, Arc, RwLock},
     };
 
     use crossbeam_channel::unbounded;
@@ -138,7 +130,7 @@ mod tests {
         let bytes = include_bytes!("../../tests/fixtures/aac_lc_stereo.adts").to_vec();
         let (tx, rx) = unbounded();
         let senders = Senders(Arc::new(RwLock::new(vec![tx])));
-        let count = Arc::new(AtomicU8::new(1));
+        let count = Arc::new(AtomicUsize::new(1));
 
         decode_media(Box::new(LiveBytes(Cursor::new(bytes))), &count, &senders).unwrap();
 

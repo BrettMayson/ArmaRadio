@@ -1,6 +1,19 @@
 #include "script_component.hpp"
 
 private _player = call CBA_fnc_currentUnit;
+private _vehicle = vehicle _player;
+if (_vehicle isNotEqualTo GVAR(listenerVehicle)) then {
+    GVAR(listenerVehicle) = _vehicle;
+    GVAR(retryDue) = createHashMap;
+    {
+        if (((GVAR(status) getOrDefault [_x, [""]])#0) in ["loading", "error", "ended"] && {
+            (GVAR(attemptVehicle) getOrDefault [_x, objNull]) isNotEqualTo _vehicle
+        }) then {
+            [_x] call FUNC(destroyLocal);
+            GVAR(status) set [_x, ["ended", diag_tickTime]];
+        };
+    } forEach (keys GVAR(nativeIDs));
+};
 private _listenerAlive = alive _player;
 if (_listenerAlive isNotEqualTo GVAR(listenerAlive)) then {
     GVAR(listenerAlive) = _listenerAlive;
@@ -40,7 +53,7 @@ if (count GVAR(playingSources) > 0) then {EXT callExtension ["listener:dir", _da
                 (getPosASL _source) vectorDiff _ppos
             };
             private _data = [
-                _x,
+                GVAR(nativeIDs) get _x,
                 (_relative#0) toFixed 2,
                 (_relative#1) toFixed 2,
                 (_relative#2) toFixed 2

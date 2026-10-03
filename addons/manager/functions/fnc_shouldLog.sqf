@@ -13,4 +13,12 @@ if (_target isEqualTo "live_radio::source" && {
     GVAR(cleanupLogReported) = true;
     true
 };
+if (_level in ["ERROR", "WARN"] && {!GVAR(debugMessages)}) exitWith {
+    private _key = _target + ":" + _message;
+    private _last = GVAR(nativeLogTimes) getOrDefault [_key, -30];
+    if (diag_tickTime - _last < 30) exitWith {false};
+    if (count GVAR(nativeLogTimes) > 128) then {GVAR(nativeLogTimes) = createHashMap};
+    GVAR(nativeLogTimes) set [_key, diag_tickTime];
+    true
+};
 true
