@@ -11,7 +11,6 @@ class CfgRadioStations {
         name = "Live Ireland";
         picture = QPATHTOF(pictures\liveireland.paa);
         url = "http://lynx.prostreaming.net:8058/stream?type=http&nocache=325927";
-        condition = "missionNamespace getVariable ['LiveIrelandAvailable', false]";
     };
     class Hirschmilch {
         name = "Hirschmilch";
