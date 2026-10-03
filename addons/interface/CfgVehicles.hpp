@@ -1,24 +1,5 @@
 class CfgVehicles {
-    class LandVehicle;
-    class Car: LandVehicle {
-        class ACE_SelfActions {
-            class GVAR(open) {
-                displayName = CSTRING(DisplayName);
-                statement = QUOTE(_target call FUNC(open));
-                condition = QUOTE([ARR_2(_target,false)] call FUNC(canOpen));
-            };
-        };
-        class ACE_Actions {
-            class ACE_MainActions {
-                class GVAR(open) {
-                    displayName = CSTRING(DisplayName);
-                    statement = QUOTE(_target call FUNC(open));
-                    condition = QUOTE([ARR_2(_target,true)] call FUNC(canOpen));
-                };
-            };
-        };
-    };
-
+    // Vehicle actions are registered under ACE_SelfActions at runtime.
     class Items_base_F;
     class Land_FMradio_F: Items_base_F {
         class ACE_Actions {
@@ -31,5 +12,19 @@ class CfgVehicles {
                 };
             };
         };
+    };
+    class Module_F;
+    class GVAR(moduleRadio): Module_F {
+        scope = 2;
+        scopeCurator = 2;
+        displayName = CSTRING(ModuleRadio);
+        category = QGVAR(modules);
+        function = QFUNC(moduleRadio);
+        isGlobal = 1;
+        isTriggerActivated = 0;
+        isDisposable = 1;
+        curatorCanAttach = 1;
+        curatorInfoType = "";
+        author = "Joncantplay";
     };
 };
