@@ -1,0 +1,100 @@
+# Arma Live Radio License
+
+Copyright (c) 2026 Brett Mayson
+
+This licence governs the use, modification, contribution, and redistribution of Arma Live Radio and its associated source code and materials (the "Software").
+
+By using, copying, modifying, contributing to, or distributing the Software, you agree to the applicable terms of this licence.
+
+## 1. Grant of Use
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of the Software, to use the Software for personal, educational, and commercial purposes.
+
+You may install, execute, and use the Software without restriction, provided such use complies with applicable laws and the terms of any third-party software or platform dependencies.
+
+## 2. Redistribution
+
+You may redistribute the Software in its original, unmodified form, provided that:
+
+* This licence and all copyright notices are preserved.
+* You do not misrepresent the origin of the Software.
+* You do not imply endorsement by the original author or project maintainers.
+
+Redistribution is permitted for both commercial and non-commercial purposes.
+
+You may mirror the official repository and distribute unmodified copies of the Software through other platforms, including Steam Workshop.
+
+## 3. Modifications and Derivative Works
+
+You may modify the Software for personal use, experimentation, and development.
+
+You are encouraged to submit modifications, improvements, and bug fixes to the official project repository through its designated contribution process.
+
+You may not publish, distribute, sublicense, or otherwise make available modified versions or derivative works of the Software without prior written permission from the copyright holder.
+
+This restriction includes, but is not limited to:
+
+* Independently maintained forks.
+* Modified releases or repackaged versions.
+* Modified source code distributed publicly.
+* Modified binaries or PBOs distributed through Steam Workshop or other platforms.
+
+This restriction applies regardless of whether distribution is commercial or non-commercial.
+
+Nothing in this section prohibits submitting modifications to the official project repository or sharing patches privately with the project maintainers.
+
+## 4. Contributions
+
+Contributors retain copyright ownership of their original contributions.
+
+By intentionally submitting a contribution to the official project repository, including through pull requests, patches, or other designated contribution channels, the contributor grants the project copyright holder and its designated maintainers a perpetual, worldwide, non-exclusive, irrevocable, royalty-free, transferable, and sublicensable licence to:
+
+* Use, reproduce, and incorporate the contribution into the Software.
+* Modify and create derivative works based on the contribution.
+* Distribute the contribution as part of the Software.
+* Relicense the contribution under more permissive terms, including source-available and open-source.
+
+This grant applies to all contributions intentionally submitted for inclusion in the project, unless explicitly identified as excluded by the contributor and accepted as such by the project maintainer.
+
+Contributors retain the right to independently use, modify, distribute, and license their own contributions, subject to any third-party rights.
+
+Contributors represent that they have the legal authority to grant the rights described in this section and that their contributions do not knowingly violate the rights of others.
+
+## 5. Project Ownership and Future Licensing
+
+The copyright holder reserves the right to change the licensing terms of the Software at any time.
+
+This includes, but is not limited to:
+
+* Adopting a different source-available licence.
+* Adopting an open-source licence approved by the Open Source Initiative.
+
+The rights granted under Section 4 survive changes in project ownership, maintenance, governance, and licensing.
+
+Any future open-source release may permit unrestricted modification, redistribution, and independent maintenance of the Software, subject to the terms of the newly selected licence.
+
+## 6. Third-Party Materials
+
+This licence only applies to material for which the copyright holder has the legal authority to grant the rights described herein.
+
+Third-party software, assets, libraries, and other materials included with or required by the Software may be subject to separate licences and terms.
+
+Nothing in this licence overrides or replaces those third-party terms.
+
+## 7. Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.
+
+## 8. Termination
+
+Any rights granted under this licence terminate automatically if you fail to comply with its terms.
+
+Upon termination, you must cease any activity that is no longer permitted under this licence.
+
+Rights and licences granted by contributors under Section 4 are irrevocable and survive such termination.
+
+## 9. Contact
+
+For questions regarding licensing, redistribution permissions, or contributions, contact the project copyright holder through the official project repository.
