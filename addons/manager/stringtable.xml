@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Project name="Live Radio">
+    <Package name="Manager">
+        <Key ID="STR_Live_Radio_Manager_DebugMessages">
+            <English>Debug messages (RPT)</English>
+            <German>Debug-Meldungen (RPT)</German>
+            <Spanish>Mensajes de depuración (RPT)</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_DebugMessagesTooltip">
+            <English>Write DEBUG and TRACE messages from the radio extension to the Arma RPT log. Off by default. Warnings and errors remain visible.</English>
+            <German>DEBUG- und TRACE-Meldungen der Radio-Erweiterung ins Arma-RPT schreiben. Standardmäßig aus. Warnungen und Fehler bleiben sichtbar.</German>
+            <Spanish>Escribir mensajes DEBUG y TRACE de la extensión en el registro RPT de Arma. Desactivado por defecto. Las advertencias y los errores siguen visibles.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_Inside3DAudio">
+            <English>3D audio inside cars and ships</English>
+            <German>3D-Ton in Autos und Schiffen</German>
+            <Spanish>Audio 3D dentro de coches y barcos</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_Inside3DAudioTooltip">
+            <English>When enabled, hear the original vehicle-center 3D position inside cars and ships. Off centers the sound on both ears. Aircraft are always centered inside. Only affects you.</English>
+            <German>Aktiviert kommt der Ton innen vom ursprünglichen 3D-Fahrzeugmittelpunkt. Aus zentriert ihn auf beiden Ohren. Fluggeräte sind innen immer mittig. Betrifft nur dich.</German>
+            <Spanish>Activado: audio 3D desde el centro del vehículo. Desactivado: sonido centrado en ambos oídos. En aeronaves siempre se centra. Solo te afecta a ti.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_MuteAll">
+            <English>Mute all radios</English>
+            <German>Alle Radios stummschalten</German>
+            <Spanish>Silenciar todas las radios</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_MuteAllTooltip">
+            <English>Mute all radios only for you.</English>
+            <German>Alle Radios nur für dich stummschalten.</German>
+            <Spanish>Silenciar todas las radios solo para ti.</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_StreamerMode">
+            <English>Streamer Mode</English>
+            <German>Streamer Mode</German>
+            <Spanish>Modo streamer</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_VolumeMultiplier">
+            <English>Volume Multiplier</English>
+            <German>Lautstärkemultiplikator</German>
+            <Spanish>Multiplicador de volumen</Spanish>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_AutoRetry">
+            <English>Auto-retry streams</English>
+            <German>Streams automatisch erneut versuchen</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Manager_AutoRetryTooltip">
+            <English>Reconnect after errors or interrupted audio. Retry after 2 seconds; initial buffering is allowed up to 10 seconds. Only affects you.</English>
+            <German>Nach Fehlern oder Abbrüchen automatisch neu verbinden. Retry nach 2 Sekunden; für den ersten Audiostart bleiben bis zu 10 Sekunden. Betrifft nur dich.</German>
+        </Key>
+    </Package>
+</Project>

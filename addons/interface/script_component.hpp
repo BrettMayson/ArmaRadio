@@ -2,9 +2,7 @@
 #define COMPONENT_BEAUTIFIED Interface
 #include "\z\live_radio\addons\main\script_mod.hpp"
 
-#define DEBUG_MODE_FULL
 #define DISABLE_COMPILE_CACHE
-#define ENABLE_PERFORMANCE_COUNTERS
 
 #ifdef DEBUG_ENABLED_INTERFACE
     #define DEBUG_MODE_FULL
@@ -35,6 +33,14 @@
 #define IDC_VOLUME_ICON 180
 #define IDC_VOLUME_BAR_FILL 190
 #define IDC_VOLUME_BAR_MOUSE 200
+#define IDC_STREAMER_STATUS 210
+#define IDC_STREAMER_TOGGLE 220
+#define IDC_MUTE 230
+#define IDC_STATUS 240
+#define IDC_RETRY 250
+#define IDC_VOLUME_TEXT 260
+#define IDC_EMPTY 270
+#define IDC_COPY_TITLE 280
 
 #define MIN_VOLUME 0
 #define MAX_VOLUME 2
@@ -43,3 +49,5 @@
 #define ICON_VOLUME_LOW QPATHTOF(ui\volume_low_ca.paa)
 #define ICON_VOLUME_MEDIUM QPATHTOF(ui\volume_medium_ca.paa)
 #define ICON_VOLUME_HIGH QPATHTOF(ui\volume_high_ca.paa)
+
+#define IDC_PRESETS 290

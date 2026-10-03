@@ -1,51 +1,147 @@
-name: Arma
+name: Arma CI Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build_extension:
+    name: Build & Test Windows Extension
     runs-on: windows-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Install latest
-        uses: actions-rs/toolchain@v1
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up MSVC build environment
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          target: x86_64-pc-windows-msvc
-          toolchain: stable
-          default: true
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+          arch: amd64
+
+      - name: Install NASM
+        shell: pwsh
+        run: |
+          choco install nasm --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          'C:\Program Files\NASM' | Out-File `
+            -FilePath $env:GITHUB_PATH `
+            -Encoding utf8 `
+            -Append
+
+      - name: Set up MSYS2 build environment
+        uses: msys2/setup-msys2@v2
         with:
-          key: build-x86_64-pc-windows-msvc
-      - name: Cargo Build
-        run: cargo build --release
-      - name: Upload
+          msystem: MSYS
+          path-type: inherit
+          update: false
+          install: make curl diffutils
+
+      - name: Build FFmpeg decoder
+        shell: msys2 {0}
+        run: bash tools/build-codecs.sh
+
+      - name: Test FFmpeg decoder
+        shell: pwsh
+        run: |
+          python tools/test-codecs.py resources/codecs/ffmpeg.exe --fetch-he
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Install Rust toolchain
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          rustup target add --toolchain 1.98.1 x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Clean Rust build
+        shell: pwsh
+        run: |
+          cargo +1.98.1 clean
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run Rust library tests
+        shell: pwsh
+        run: |
+          cargo +1.98.1 test --locked --target x86_64-pc-windows-msvc --lib
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build release extension
+        shell: pwsh
+        run: |
+          cargo +1.98.1 build --release --locked --target x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          New-Item -ItemType Directory -Force output | Out-Null
+
+          Copy-Item `
+            'target/x86_64-pc-windows-msvc/release/live_radio.dll' `
+            'output/live_radio_x64.dll'
+
+      - name: Upload Windows extension artifact
         uses: actions/upload-artifact@v4
         with:
-          name: x86_64-pc-windows-msvc
-          path: target/release/live_radio.dll
+          name: windows-extension
+          path: output/live_radio_x64.dll
           if-no-files-found: error
           retention-days: 30
+
+      - name: Upload FFmpeg source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-source
+          path: output/ffmpeg-source/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload FFmpeg decoder artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-decoder
+          path: output/codec/ffmpeg.exe
+          if-no-files-found: error
+          retention-days: 30
+
   package:
+    name: Package Arma Mod
     needs: build_extension
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
     steps:
-      - uses: actions/checkout@v2
-      
-      - uses: actions/download-artifact@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download Windows extension artifact
+        uses: actions/download-artifact@v4
         with:
-          name: x86_64-pc-windows-msvc
-      - run: mv live_radio.dll live_radio_x64.dll
-      - name: Setup HEMTT
+          name: windows-extension
+
+      - name: Remove legacy 32-bit extension
+        run: rm -f live_radio.dll
+
+      - name: Set up HEMTT
         uses: arma-actions/hemtt@v1
-      - name: Build
+
+      - name: Build HEMTT release
         run: hemtt release
-      - uses: actions/upload-artifact@v4
+
+      - name: Prepare mod artifact
+        run: |
+          mkdir artifact
+          unzip -q releases/live_radio-latest.zip -d artifact
+
+      - name: Upload Arma mod artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: live_radio.zip
-          path: 'releases/live_radio-latest.zip'
+          name: live_radio
+          path: artifact/
+          if-no-files-found: error
+          retention-days: 30

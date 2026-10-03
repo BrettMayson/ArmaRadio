@@ -1,0 +1,4 @@
+The Windows build embeds a minimal FFmpeg 8.1.3 executable under LGPL-2.1-or-later.
+It is built without GPL or nonfree components. It runs as a separate decoder process.
+The matching source archive, license and configure arguments are published as a separate source distribution with the release.
+FFmpeg project: https://ffmpeg.org/

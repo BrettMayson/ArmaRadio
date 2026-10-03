@@ -8,6 +8,7 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {"cba_settings"};
         author = "BrettMayson";
+        authors[] = {"BrettMayson", "Joncantplay"};
         VERSION_CONFIG;
     };
 };

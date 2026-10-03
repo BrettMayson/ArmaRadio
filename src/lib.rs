@@ -1,27 +1,29 @@
+// Based on the original Live Radio implementation by BrettMayson.
+// Playback and compatibility changes by Joncantplay.
 #![deny(clippy::unwrap_used)]
 
 use std::{
-    sync::{Arc, OnceLock, RwLock},
+    sync::{OnceLock, RwLock},
     time::{Duration, SystemTime},
 };
 
-use arma_rs::{Extension, arma};
-use rand::{Rng, distributions::Alphanumeric, thread_rng};
+use arma_rs::{arma, Extension};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 #[macro_use]
 extern crate log;
 
+pub mod album;
 mod audio;
 mod listener;
 mod logger;
 mod source;
 mod streams;
-mod vector3;
-pub mod album;
 
 #[arma]
 pub fn init() -> Extension {
     let ext = Extension::build()
+        .version(env!("CARGO_PKG_VERSION").to_string())
         .group("listener", listener::group())
         .group("source", source::group())
         .command("id", command_id)
@@ -29,44 +31,41 @@ pub fn init() -> Extension {
         .finish();
     logger::init(ext.context());
 
-    let tmp_dir = dirs::cache_dir().expect("Failed to get cache dir").join("live_radio");
-    if tmp_dir.exists() {
-        std::fs::remove_dir_all(&tmp_dir).expect("Failed to delete cache directory");
-    }
-    std::fs::create_dir_all(&tmp_dir).expect("Failed to create cache directory");
-
-    std::thread::spawn(|| {
-        loop {
-            if cfg!(test) {
-                return;
-            }
-            let earlier = Heartbeat::get();
-            let Ok(dur) = SystemTime::now().duration_since(*earlier.read().expect("not poisoned"))
-            else {
-                error!("Error getting duration since last heartbeat");
-                source::cleanup();
-                continue;
-            };
-
-            if dur > Duration::from_secs(3) {
-                source::cleanup();
-            }
-            std::thread::sleep(Duration::from_secs(1));
+    std::thread::spawn(|| loop {
+        if cfg!(test) {
+            return;
         }
+        let earlier = match Heartbeat::get().read() {
+            Ok(earlier) => *earlier,
+            Err(_) => {
+                error!("Heartbeat lock was poisoned");
+                source::cleanup();
+                std::thread::sleep(Duration::from_secs(1));
+                continue;
+            }
+        };
+        let Ok(dur) = SystemTime::now().duration_since(earlier) else {
+            error!("Error getting duration since last heartbeat");
+            source::cleanup();
+            continue;
+        };
+
+        if dur > Duration::from_secs(3) {
+            source::cleanup();
+        }
+        std::thread::sleep(Duration::from_secs(1));
     });
 
     ext
 }
 
 fn command_id() -> String {
-    String::from_utf8(
-        thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(8)
-            .collect::<Vec<u8>>(),
-    )
-    .expect("not poisoned")
-    .to_lowercase()
+    thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(8)
+        .map(char::from)
+        .collect::<String>()
+        .to_lowercase()
 }
 
 fn command_heartbeat() {
@@ -76,14 +75,16 @@ fn command_heartbeat() {
 pub struct Heartbeat;
 
 impl Heartbeat {
-    pub fn get() -> Arc<RwLock<SystemTime>> {
-        static SINGLETON: OnceLock<Arc<RwLock<SystemTime>>> = OnceLock::new();
-        SINGLETON
-            .get_or_init(|| Arc::new(RwLock::new(SystemTime::now())))
-            .clone()
+    pub fn get() -> &'static RwLock<SystemTime> {
+        static HEARTBEAT: OnceLock<RwLock<SystemTime>> = OnceLock::new();
+        HEARTBEAT.get_or_init(|| RwLock::new(SystemTime::now()))
     }
+
     pub fn beat() {
-        *Self::get().write().expect("not poisoned") = SystemTime::now();
+        match Self::get().write() {
+            Ok(mut heartbeat) => *heartbeat = SystemTime::now(),
+            Err(_) => error!("Heartbeat lock was poisoned"),
+        }
     }
 }
 

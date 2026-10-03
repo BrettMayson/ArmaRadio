@@ -1,5 +1,6 @@
 #include "script_component.hpp"
 /*
+ * Edited by: Joncantplay
  * Author: mharis001
  * Handles updating the volume bar and icon to reflect the given volume level.
  *
@@ -18,6 +19,7 @@
 
 params ["_display", "_volume"];
 
+(_display displayCtrl IDC_VOLUME_TEXT) ctrlSetText format ["%1%2", round (_volume * 100), "%"];
 // Convert volume to percentage of max
 _volume = _volume / MAX_VOLUME;
 

@@ -7,5 +7,13 @@ old/
 keys/
 target/
 .hemttout/
+.vscode/
 *.biprivatekey
 *.hemttprivatekey
+
+!resources/x86/OpenAL32.dll
+!resources/x64/OpenAL32.dll
+live_radio_openal_*.dll
+
+.codec-build/
+output/

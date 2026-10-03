@@ -1,3 +1,4 @@
+// Original album artwork lookup by BrettMayson; error handling updated by Joncantplay.
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -14,21 +15,20 @@ pub struct AlbumSearchResult {
 }
 
 pub fn search_album(track: &str) -> Option<String> {
+    let client = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build().ok()?;
     let track = urlencoding::encode(track);
-    let url = format!("https://itunes.apple.com/search?term={track}&media=music&limit=1&_=1790527953928");
-    let response = reqwest::blocking::get(&url).expect("Failed to send request").text().expect("Failed to read response");
-    debug!("Response: {}", response);
-    let result = serde_json::from_str::<ResultWrapper>(&response).expect("Failed to parse response");
-    let result = result.results.into_iter().next()?;
+    let url = format!("https://itunes.apple.com/search?term={track}&media=music&limit=1");
+    let text = client.get(url).send().ok()?.error_for_status().ok()?.text().ok()?;
+    let result = serde_json::from_str::<ResultWrapper>(&text).ok()?.results.into_iter().next()?;
     let url = result.artwork_url_100.replace("100x100bb", "400x400bb");
-    let track_id = result.track_id;
-    let tmp_dir = dirs::cache_dir().expect("Failed to get cache dir").join("live_radio");
-    let tmp_file_path = tmp_dir.join(format!("{track_id}.jpg"));
+    let tmp_dir = dirs::cache_dir()?.join("live_radio");
+    std::fs::create_dir_all(&tmp_dir).ok()?;
+    let tmp_file_path = tmp_dir.join(format!("{}.jpg", result.track_id));
     if !tmp_file_path.exists() {
-        let mut tmp_file = std::fs::File::create(&tmp_file_path).expect("Failed to create temp file");
-        let mut response = reqwest::blocking::get(&url).expect("Failed to download image");
-        std::io::copy(&mut response, &mut tmp_file).expect("Failed to write to temp file");
+        let bytes = client.get(url).send().ok()?.error_for_status().ok()?.bytes().ok()?;
+        std::fs::write(&tmp_file_path, bytes).ok()?;
     }
-
     Some(tmp_file_path.to_string_lossy().to_string())
 }

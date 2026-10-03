@@ -8,6 +8,7 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {"live_radio_main"};
         author = "BrettMayson";
+        authors[] = {"BrettMayson", "Joncantplay"};
         VERSION_CONFIG;
     };
 };
