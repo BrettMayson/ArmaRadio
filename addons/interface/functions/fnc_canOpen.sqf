@@ -1,35 +1,48 @@
 #include "script_component.hpp"
+
 /*
- * Author: Brett Mayson,  matidp4
- * Checks if the player can open the interface
+ * Author: BrettMayson, matidp4, Joncantplay
+ *
+ * Checks whether the player can open the interface.
  *
  * Arguments:
- * 0: Object <OBJECT>
- * 1: Outside <BOOLEAN>
+ * 0: Unit - The player unit attempting to access the object
+ * 1: Object - Object being accessed
+ * 2: Boolean - Whether the object is being accessed from outside a vehicle
  *
  * Return Value:
- * BOOLEAN
- *
- * Example:
- * [_object] call live_radio_interface_fnc_canOpen
+ * Boolean
  *
  * Public: No
  */
 
-params ["_object", "_outside"];
+params [
+    ["_object", objNull, [objNull]],
+    ["_outside", false, [true]]
+];
 
-if (!_outside) then {
-    if (GVAR(driverAndCommanderOnly)) exitWith {
-        private _player = call CBA_fnc_currentUnit;
+private _unit = call CBA_fnc_currentUnit;
 
-        (driver _object == _player) ||
-        (commander _object == _player)
+if (!_outside && { isNull objectParent _unit }) exitWith { false };
+
+if (
+    isNull _unit
+    || {!alive _unit}
+    || {isNull _object}
+    || {!alive _object}
+    || {!([_object] call FUNC(hasRadio))}
+) exitWith { false };
+
+if (_outside) exitWith {
+    if (_object isKindOf "Static" || _object isKindOf "Thing") exitWith { true };
+
+    if (GVAR(interactOutsideVehicle) && GVAR(driverAndCommanderOnly)) exitWith {
+        (isNull driver _object) && (isNull commander _object)
     };
 
-    true
-} else {
-    if (!GVAR(interactOutsideVehicle)) exitWith {false};
-    if (!isNull driver _object) exitWith {false};
-
-    true
+    GVAR(interactOutsideVehicle)
 };
+
+!GVAR(driverAndCommanderOnly)
+|| {driver _object == _unit}
+|| {commander _object == _unit}

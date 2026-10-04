@@ -9,6 +9,8 @@ PREP(handleVolume);
 PREP(handleVolumeButtonDown);
 PREP(handleVolumeButtonUp);
 PREP(handleVolumeMouse);
+PREP(hasRadio);
 PREP(open);
+PREP(registerRadio);
 PREP(updateInfo);
 PREP(updateList);

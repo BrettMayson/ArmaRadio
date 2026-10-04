@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="Live Radio">
     <Package name="Interface">
+        <Key ID="STR_Live_Radio_Interface_CopiedToClipboard">
+            <English>Copied to clipboard</English>
+            <Spanish>Copiado al portapapeles</Spanish>
+            <German>In die Zwischenablage kopiert</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_CopyToClipboard">
+            <English>Click to copy to clipboard</English>
+            <Spanish>Haz clic para copiar al portapapeles</Spanish>
+            <German>Klicken, um in die Zwischenablage zu kopieren</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_CopyrightFreeOnly">
+            <English>Copyright Free Only</English>
+            <Spanish>Solo libres de derechos de autor</Spanish>
+            <German>Nur urheberrechtsfrei</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Interface_CopyrightFreeTag">
+            <English>[Copyright Free] %1</English>
+            <Spanish>[Libre de derechos] %1</Spanish>
+            <German>[Urheberrechtsfrei] %1</German>
+        </Key>
         <Key ID="STR_Live_Radio_Interface_DisplayName">
             <English>FM Radio</English>
             <Spanish>Radio FM</Spanish>
@@ -15,26 +35,6 @@
             <English>Interact Outside Vehicle</English>
             <Spanish>Interactuar fuera del vehículo</Spanish>
             <German>Außerhalb des Fahrzeugs interagieren</German>
-        </Key>
-        <Key ID="STR_Live_Radio_Interface_CopyrightFreeOnly">
-            <English>Copyright Free Only</English>
-            <Spanish>Solo libres de derechos de autor</Spanish>
-            <German>Nur urheberrechtsfrei</German>
-        </Key>
-        <Key ID="STR_Live_Radio_Interface_CopyrightFreeTag">
-            <English>[Copyright Free] %1</English>
-            <Spanish>[Libre de derechos] %1</Spanish>
-            <German>[Urheberrechtsfrei] %1</German>
-        </Key>
-        <Key ID="STR_Live_Radio_Interface_CopyToClipboard">
-            <English>Click to copy to clipboard</English>
-            <Spanish>Haz clic para copiar al portapapeles</Spanish>
-            <German>Klicken, um in die Zwischenablage zu kopieren</German>
-        </Key>
-        <Key ID="STR_Live_Radio_Interface_CopiedToClipboard">
-            <English>Copied to clipboard</English>
-            <Spanish>Copiado al portapapeles</Spanish>
-            <German>In die Zwischenablage kopiert</German>
         </Key>
     </Package>
 </Project>

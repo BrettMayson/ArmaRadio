@@ -18,16 +18,16 @@ class CfgRadioStations {
     };
     class BBC {
         name = "BBC Radio";
-        class BBCRadioOne {
-            name = "BBC - Radio One";
+        class BBCRadio1 {
+            name = "BBC - Radio 1";
             url = "http://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8";
         };
         class BBCRadio1Xtra {
-            name = "BBC - Radio 1Xtra";
+            name = "BBC - Radio 1 Xtra";
             url = "http://as-hls-ww-live.akamaized.net/pool_92079267/live/ww/bbc_1xtra/bbc_1xtra.isml/bbc_1xtra-audio%3d96000.norewind.m3u8";
         };
         class BBCRadio1Dance {
-            name = "BBC - Radio 1Dance";
+            name = "BBC - Radio 1 Dance";
             url = "http://as-hls-ww-live.akamaized.net/pool_62063831/live/ww/bbc_radio_one_dance/bbc_radio_one_dance.isml/bbc_radio_one_dance-audio%3d96000.norewind.m3u8";
         };
         class BBCRadio2 {

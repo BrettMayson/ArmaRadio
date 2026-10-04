@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="Live Radio">
+    <Package name="Modules">
+        <Key ID="STR_Live_Radio_Modules_Feedback_NothingSelected">
+            <English>Place on an object</English>
+            <Spanish>Colocar en un objeto</Spanish>
+            <German>Auf ein Objekt platzieren</German>
+        </Key>
+        <Key ID="STR_Live_Radio_Modules_Radio">
+            <English>Enable FM Radio on object</English>
+            <Spanish>Activar Radio FM en un objeto</Spanish>
+            <German>FM Radio auf Objekt aktivieren</German>
+        </Key>
+    </Package>
+</Project>
