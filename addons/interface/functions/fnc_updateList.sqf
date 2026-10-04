@@ -10,7 +10,7 @@
  * None
  *
  * Example:
- * [DISPLAY] call live_radiointerface_fnc_updateList
+ * [DISPLAY] call live_radio_interface_fnc_updateList
  *
  * Public: No
  */
@@ -45,7 +45,7 @@ _ctrlList lbSetCurSel -1;
     private _isActive = _url isEqualTo _activeURL;
 
     private _displayName = if (_noCopyright && !GVAR(copyrightFreeOnly)) then {
-        format [localize LSTRING(CopyrightFreeTag), _name]
+        format [LLSTRING(CopyrightFreeTag), _name]
     } else {
         _name
     };

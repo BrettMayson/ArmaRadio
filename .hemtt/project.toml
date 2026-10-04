@@ -12,6 +12,7 @@ include = [
 description = "README.md"
 
 [hemtt.launch.default]
+mission = "launch.VR"
 workshop = [
     "450814997", # CBA
     "463939057", # ACE

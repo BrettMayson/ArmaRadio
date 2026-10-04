@@ -4,6 +4,11 @@
         <Key ID="STR_Live_Radio_Main_Author">
             <English>BrettMayson</English>
         </Key>
+        <Key ID="STR_Live_Radio_Main_DisplayName">
+            <English>Live Radio</English>
+            <Spanish>Radio en Vivo</Spanish>
+            <German>Live Radio</German>
+        </Key>
         <Key ID="STR_Live_Radio_Main_URL">
             <English>https://github.com/BrettMayson/ArmaRadio</English>
         </Key>

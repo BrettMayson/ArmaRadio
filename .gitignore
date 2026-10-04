@@ -9,3 +9,4 @@ target/
 .hemttout/
 *.biprivatekey
 *.hemttprivatekey
+.vscode/

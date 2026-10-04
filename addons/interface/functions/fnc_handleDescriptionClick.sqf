@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [CONTROL, 0] call live_radiointerface_fnc_handleDescriptionClick
+ * [CONTROL, 0] call live_radio_interface_fnc_handleDescriptionClick
  *
  * Public: No
  */
@@ -24,4 +24,4 @@ private _title = ctrlText _ctrlDescription;
 if (_title == "") exitWith {};
 
 copyToClipboard _title;
-hint (localize LSTRING(CopiedToClipboard));
+hint (LLSTRING(CopiedToClipboard));

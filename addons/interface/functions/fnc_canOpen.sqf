@@ -1,16 +1,48 @@
 #include "script_component.hpp"
+
 /*
- * Authors: BrettMayson, matidp4
- * Edited by: Joncantplay
- * Check supported objects, outside access and driver/commander permissions.
+ * Author: BrettMayson, matidp4, Joncantplay
+ *
+ * Checks whether the player can open the interface.
+ *
+ * Arguments:
+ * 0: Unit - The player unit attempting to access the object
+ * 1: Object - Object being accessed
+ * 2: Boolean - Whether the object is being accessed from outside a vehicle
+ *
+ * Return Value:
+ * Boolean
+ *
+ * Public: No
  */
-params ["_object", ["_outside", isNull objectParent (call CBA_fnc_currentUnit)]];
-private _player = call CBA_fnc_currentUnit;
-if (!alive _object || {!([_object] call FUNC(isSupported))}) exitWith {false};
-private _vehicle = _object isKindOf "LandVehicle" || {_object isKindOf "Air"} || {_object isKindOf "Ship"};
-if (!_vehicle) exitWith {isNull objectParent _player && {_player distance _object <= 5}};
+
+params [
+    ["_object", objNull, [objNull]],
+    ["_outside", false, [true]]
+];
+
+private _unit = call CBA_fnc_currentUnit;
+
+if (!_outside && { isNull objectParent _unit }) exitWith { false };
+
+if (
+    isNull _unit
+    || {!alive _unit}
+    || {isNull _object}
+    || {!alive _object}
+    || {!([_object] call FUNC(hasRadio))}
+) exitWith { false };
+
 if (_outside) exitWith {
-    !GVAR(driverAndCommanderOnly) && {isNull driver _object} && {GVAR(interactOutsideVehicle)} && {_player distance _object <= 5}
+    if (_object isKindOf "Static" || _object isKindOf "Thing") exitWith { true };
+
+    if (GVAR(interactOutsideVehicle) && GVAR(driverAndCommanderOnly)) exitWith {
+        (isNull driver _object) && (isNull commander _object)
+    };
+
+    GVAR(interactOutsideVehicle)
 };
-if (vehicle _player != _object) exitWith {false};
-!GVAR(driverAndCommanderOnly) || {driver _object == _player} || {commander _object == _player}
+
+!GVAR(driverAndCommanderOnly)
+|| {driver _object == _unit}
+|| {commander _object == _unit}

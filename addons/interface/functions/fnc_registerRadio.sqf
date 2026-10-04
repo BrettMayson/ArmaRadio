@@ -1,22 +1,39 @@
 #include "script_component.hpp"
-// Author: Joncantplay
-// Register local ACE actions once. Public object variables handle JIP availability.
+/*
+ * Author: Joncantplay
+ * Registers the radio interface actions for the given object.
+ *
+ * Arguments:
+ * 0: Object - The object for which to register the radio interface actions
+ *
+ * Return Value:
+ * None
+ *
+ * Example:
+ * [_object] call live_radio_interface_fnc_registerRadio
+ *
+ * Public: No
+ */
+
 params [["_object", objNull, [objNull]]];
+
 if (!hasInterface || {isNull _object} || {_object getVariable [QGVAR(actionsRegistered), false]}) exitWith {};
-if (_object isKindOf "Car" || {_object isKindOf "Air"} || {_object isKindOf "Ship"} || {
-    _object isKindOf "Land_FMradio_F"
-}) exitWith {};
-if !(isClass (configFile >> "CfgPatches" >> "ace_interact_menu")) exitWith {};
+
 _object setVariable [QGVAR(actionsRegistered), true];
-private _outside = [QGVAR(openOutside), localize "STR_Live_Radio_Interface_DisplayName", "",
+_object setVariable [QGVAR(enabled), true];
+
+if !(isClass (configFile >> "CfgPatches" >> "ace_interact_menu")) exitWith {};
+
+private _outside = [QGVAR(openOutside), LLSTRING(DisplayName), "",
     {[_target] call FUNC(open)},
-    {isNull objectParent _player && {[_target] call FUNC(canOpen)}},
+    {[_target,true] call FUNC(canOpen)},
     {}, [], [0, 0, 0], 5
 ] call ace_interact_menu_fnc_createAction;
 [_object, 0, ["ACE_MainActions"], _outside] call ace_interact_menu_fnc_addActionToObject;
-private _inside = [QGVAR(openInside), localize "STR_Live_Radio_Interface_DisplayName", "",
+
+private _inside = [QGVAR(openInside), LLSTRING(DisplayName), "",
     {[_target] call FUNC(open)},
-    {vehicle _player == _target && {[_target] call FUNC(canOpen)}},
+    {[_target] call FUNC(canOpen)},
     {}, [], [0, 0, 0], 10, [false, true, false, false, true]
 ] call ace_interact_menu_fnc_createAction;
 [_object, 1, ["ACE_SelfActions"], _inside] call ace_interact_menu_fnc_addActionToObject;
