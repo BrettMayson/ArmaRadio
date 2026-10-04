@@ -26,7 +26,7 @@ if (_ctrlList getVariable [QGVAR(locked), false]) exitWith {};
 // Delayed to allow the metadata to be received by the extension
 private _display = ctrlParent _ctrlList;
 [{
-    _this call FUNC(updateInfo);
+    [QGVAR(updateInfo)] call CBA_fnc_globalEvent;
 }, [_display], 0.3] call CBA_fnc_waitAndExecute;
 
 // Change the station if the radio is powered on

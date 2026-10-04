@@ -15,6 +15,7 @@ class GVAR(display) {
     movingEnable = 1;
     enableSimulation = 1;
     onLoad = QUOTE(uiNamespace setVariable [ARR_2(QQGVAR(display),_this select 0)]);
+    onUnload = QUOTE(uiNamespace setVariable [ARR_2(QQGVAR(display),displayNull)]);
     class controls {
         class Background: ctrlStaticBackground {
             x = QUOTE(CENTER_X - GRID_W(140/2));

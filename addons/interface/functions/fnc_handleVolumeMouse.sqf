@@ -23,11 +23,8 @@ if (_ctrlVolumeBarMouse getVariable [QGVAR(moving), false]) then {
     ctrlPosition _ctrlVolumeBarMouse params ["_posX", "", "_posW"];
     private _volume = linearConversion [_posX, _posX + _posW, _mousePosX, MIN_VOLUME, MAX_VOLUME, true];
 
-    // Update the volume bar and icon
-    private _display = ctrlParent _ctrlVolumeBarMouse;
-    [_display, _volume] call FUNC(handleVolume);
-
     // Update the radio's volume
+    private _display = ctrlParent _ctrlVolumeBarMouse;
     private _object = _display getVariable QGVAR(object);
     [_object, _volume] call EFUNC(manager,volume);
 };

@@ -50,3 +50,48 @@ if (isClass (configFile >> "CfgPatches" >> "ace_interact_menu")) then {
 }] call CBA_fnc_addEventHandler;
 
 [QGVAR(radioEnabled), {call FUNC(registerRadio)}] call CBA_fnc_addEventHandler;
+
+[QGVAR(updateInfo), {
+    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+    if (!isNull _display) then {
+        [_display] call FUNC(updateInfo);
+    };
+}] call CBA_fnc_addEventHandler;
+
+[QEGVAR(manager,volume), { 
+    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+    if (isNull _display) exitWith {};
+    private _object = _display getVariable [QGVAR(object), objNull];
+
+    params ["", "_value", "_source"];
+
+    if (isNull _object || _object != _source) exitWith {};
+    [_display, _value] call live_radio_interface_fnc_handleVolume;
+}] call CBA_fnc_addEventHandler;
+
+[QEGVAR(manager,stop), {
+    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+    if (isNull _display) exitWith {};
+    private _object = _display getVariable [QGVAR(object), objNull];
+
+    params ["", "_value", "_source"];
+    if (_value != "") exitWith {}; // We're about to start playing a different station anyway
+
+    if (isNull _object || _object != _source) exitWith {};
+    private _ctrl = _display displayCtrl IDC_POWER;
+    _display setVariable [QGVAR(power), false];
+    [_ctrl, false] call live_radio_interface_fnc_handlePower;
+}] call CBA_fnc_addEventHandler;
+
+[QEGVAR(manager,start), {
+    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+    if (isNull _display) exitWith {};
+    private _object = _display getVariable [QGVAR(object), objNull];
+
+    params ["", "_value", "_source"];
+
+    if (isNull _object || _object != _source) exitWith {};
+    private _ctrl = _display displayCtrl IDC_POWER;
+    _display setVariable [QGVAR(power), true];
+    [_ctrl, false] call live_radio_interface_fnc_handlePower;
+}] call CBA_fnc_addEventHandler;

@@ -9,7 +9,7 @@ if (_existing isNotEqualTo []) then {
     if ((_existing select 1) isEqualTo _url) then {
         _ret = _existing select 0;
     } else {
-        [QGVAR(stop), [_existing select 0]] call CBA_fnc_globalEvent;
+        [QGVAR(stop), [_existing select 0, _url, _source]] call CBA_fnc_globalEvent;
     };
 };
 
