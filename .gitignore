@@ -10,3 +10,4 @@ target/
 *.biprivatekey
 *.hemttprivatekey
 .vscode/
+.hemtt/missions/~*
